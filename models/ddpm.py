@@ -31,7 +31,7 @@ ResidualBlock = layers.ResidualBlock
 ResnetBlockDDPM = layers.ResnetBlockDDPM
 Upsample = layers.Upsample
 Downsample = layers.Downsample
-conv3x3 = layers.ddpm_conv3x3
+conv1x1 = layers.ddpm_conv1x1
 get_act = layers.get_act
 get_normalization = normalization.get_normalization
 default_initializer = layers.default_init
@@ -44,7 +44,7 @@ class DDPM(nn.Module):
     self.act = act = get_act(config)
     self.register_buffer('sigmas', torch.tensor(utils.get_sigmas(config)))
 
-    self.nf = nf = config.model.nf # 128
+    self.nf = nf = config.model.nf # 32
     ch_mult = config.model.ch_mult # (1, 2, 2, 2)
     self.num_res_blocks = num_res_blocks = config.model.num_res_blocks #2
     self.attn_resolutions = attn_resolutions = config.model.attn_resolutions #(16,)
@@ -70,7 +70,7 @@ class DDPM(nn.Module):
     channels = config.data.num_channels #1
 
     # Downsampling block
-    modules.append(conv3x3(channels, nf))
+    modules.append(conv1x1(channels, nf))
     hs_c = [nf]
     in_ch = nf
     for i_level in range(num_resolutions):
@@ -104,7 +104,7 @@ class DDPM(nn.Module):
 
     assert not hs_c
     modules.append(nn.GroupNorm(num_channels=in_ch, num_groups=32, eps=1e-6))
-    modules.append(conv3x3(in_ch, channels, init_scale=0.))
+    modules.append(conv1x1(in_ch, channels, init_scale=0.))
     self.all_modules = nn.ModuleList(modules)
 
     self.scale_by_sigma = config.model.scale_by_sigma

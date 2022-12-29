@@ -97,7 +97,7 @@ class Dense(nn.Module):
     super().__init__()
 
 
-def ddpm_conv1x1(in_planes, out_planes, stride=1, bias=True, init_scale=1., padding=0):
+def ddpm_conv2x2(in_planes, out_planes, stride=1, bias=True, init_scale=1., padding=0):
   """1x1 convolution with DDPM initialization."""
   conv = nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, padding=padding, bias=bias)
   conv.weight.data = default_init(init_scale)(conv.weight.data.shape)
@@ -115,10 +115,10 @@ def ncsn_conv3x3(in_planes, out_planes, stride=1, bias=True, dilation=1, init_sc
   return conv
 
 
-def ddpm_conv3x3(in_planes, out_planes, stride=1, bias=True, dilation=1, init_scale=1., padding=1):
+def ddpm_conv1x1(in_planes, out_planes, stride=1, bias=True, dilation=1, init_scale=1., padding=1):
   """3x3 convolution with DDPM initialization."""
 #  conv = nn.Conv3d(in_planes, out_planes, kernel_size=(3,3,1), stride=(stride,stride,1), padding=(padding,padding,0),  #  add z axis
-  conv = nn.Conv3d(in_planes, out_planes, kernel_size=(3,3,3), stride=(stride,stride,stride), padding=(padding,padding,padding),
+  conv = nn.Conv3d(in_planes, out_planes, kernel_size=3, stride=stride, padding=padding,
                    dilation=dilation, bias=bias)
   conv.weight.data = default_init(init_scale)(conv.weight.data.shape)
   nn.init.zeros_(conv.bias)
@@ -550,10 +550,10 @@ class NIN(nn.Module):
     self.W = nn.Parameter(default_init(scale=init_scale)((in_dim, num_units)), requires_grad=True)
     self.b = nn.Parameter(torch.zeros(num_units), requires_grad=True)
 
-  def forward(self, x): #  x=(B,C,H,W)
-    x = x.permute(0, 2, 3, 4, 1) # x=(B,H,W,C), (0,2,3,4,1)
+  def forward(self, x): #  x=(B,C,H)
+    x = x.permute(0, 2, 1) # x=(B,H,C),
     y = contract_inner(x, self.W) + self.b
-    return y.permute(0, 4, 1, 2, 3) # x=(B,C,H,W), (0,4,1,2,3)
+    return y.permute(0, 2, 1) # x=(B,C,H),
 
 
 class AttnBlock(nn.Module):
@@ -567,21 +567,18 @@ class AttnBlock(nn.Module):
     self.NIN_3 = NIN(channels, channels, init_scale=0.)
 
   def forward(self, x):
-    B, C, H, W, D = x.shape
+    B, C, H  = x.shape
     h = self.GroupNorm_0(x)  #  h.shape=x.shape
 #    print('layers.py 571 h.shape=',h.shape,x.shape); raise RuntimeError
     q = self.NIN_0(h)
     k = self.NIN_1(h)
     v = self.NIN_2(h)
 
-    w = torch.einsum('bchwd,bcijk->bhwdijk', q, k) * (int(C) ** (-0.5))
-#    w = torch.einsum('bchw,bcij->bhwij', q, k) * (int(C) ** (-0.5))
-    w = torch.reshape(w, (B, H, W, D, H * W * D)) #  (B,H,W,D,H*W*D)
+    w = torch.einsum('bch,bci->bhi', q, k) * (int(C) ** (-0.5))#ここ微妙
+    #w = torch.reshape(w, (B, H, W, H * W))
     w = F.softmax(w, dim=-1)
-    w = torch.reshape(w, (B, H, W, D, H, W, D))  #  (B,H,W,D,H,W,D)
-#    h = torch.einsum('bhwij,bcij->bchw', w, v) # 'bhwdijk,bcijk->bchwd'
-    h = torch.einsum('bhwdijk,bcijk->bchwd', w, v) 
-    h = self.NIN_3(h)
+    #w = torch.reshape(w, (B, H, W, H, W))
+    h = torch.einsum('bhwij,bcij->bchw', w, v)
     return x + h
 
 
@@ -589,13 +586,12 @@ class Upsample(nn.Module):
   def __init__(self, channels, with_conv=False):
     super().__init__()
     if with_conv:
-      self.Conv_0 = ddpm_conv3x3(channels, channels)
+      self.Conv_0 = ddpm_conv1x1(channels, channels)
     self.with_conv = with_conv
 
   def forward(self, x):
-    B, C, H, W, D = x.shape
-#    h = F.interpolate(x, (H * 2, W * 2, D * 1), mode='nearest')  #  add z axis
-    h = F.interpolate(x, (H * 2, W * 2, D * 2), mode='nearest')  #  add y axis
+    B, C, H = x.shape
+    h = F.interpolate(x, (H * 2), mode='nearest')
     if self.with_conv:
       h = self.Conv_0(h)
     return h
@@ -605,22 +601,17 @@ class Downsample(nn.Module):
   def __init__(self, channels, with_conv=False):
     super().__init__()
     if with_conv:
-      self.Conv_0 = ddpm_conv3x3(channels, channels, stride=2, padding=0)
+      self.Conv_0 = ddpm_conv1x1(channels, channels, stride=2, padding=0)
     self.with_conv = with_conv
 
   def forward(self, x):
     B, C, H, W, D = x.shape
     # Emulate 'SAME' padding
     if self.with_conv:
-      #print("pad前", x.shape)
-#      x = F.pad(x, (0, 0, 0, 1, 0, 1))  #  add z axis
-      x = F.pad(x, (0, 1, 0, 1, 0, 1))  
-      #print("padによる効果を表示", x.shape)
-#      print('at 614 x=',x.shape) # ; raise RuntimeError
+      x = F.pad(x, (0, 1))  
       x = self.Conv_0(x)
-#      print('at 616 x=',x.shape) # ; raise RuntimeError
     else:
-      x = F.avg_pool2d(x, kernel_size=2, stride=2, padding=0)
+      x = F.avg_pool1d(x, kernel_size=2, stride=2, padding=0)#ここをpool1dに変更
 #      print('at 619 x=',x.shape) # ; raise RuntimeError
 
 #    print('x=',x.shape,(B,C,H,W,D)); raise RuntimeError
@@ -637,7 +628,7 @@ class ResnetBlockDDPM(nn.Module):
       out_ch = in_ch
     self.GroupNorm_0 = nn.GroupNorm(num_groups=32, num_channels=in_ch, eps=1e-6)
     self.act = act
-    self.Conv_0 = ddpm_conv3x3(in_ch, out_ch)
+    self.Conv_0 = ddpm_conv1x1(in_ch, out_ch)
     if temb_dim is not None:
       self.Dense_0 = nn.Linear(temb_dim, out_ch)
       self.Dense_0.weight.data = default_init()(self.Dense_0.weight.data.shape)
@@ -645,10 +636,10 @@ class ResnetBlockDDPM(nn.Module):
 
     self.GroupNorm_1 = nn.GroupNorm(num_groups=32, num_channels=out_ch, eps=1e-6)
     self.Dropout_0 = nn.Dropout(dropout)
-    self.Conv_1 = ddpm_conv3x3(out_ch, out_ch, init_scale=0.)
+    self.Conv_1 = ddpm_conv1x1(out_ch, out_ch, init_scale=0.)
     if in_ch != out_ch:
       if conv_shortcut:
-        self.Conv_2 = ddpm_conv3x3(in_ch, out_ch)
+        self.Conv_2 = ddpm_conv1x1(in_ch, out_ch)
       else:
         self.NIN_0 = NIN(in_ch, out_ch)
     self.out_ch = out_ch

@@ -129,18 +129,10 @@ def train(config, workdir):
   for step in range(0, num_train_steps + 1):
     # Convert data to JAX arrays and normalize them. Use ._numpy() to avoid copy.
     batch = torch.from_numpy(next(train_iter)['image']._numpy()).to(config.device).float()
-    #print(batch.shape)
-    batch = batch.permute(0, 3, 1, 2)
-    batch = scaler(batch)
-    batch = torch.unsqueeze(batch,dim=-4)  #  add channel axis for debug
-    #print(batch.shape)
-    """バッチの詳細を表示するためのもの
-    for i in range(3):
-      for j in range(32):
-        print(batch[0][i][j])
-  
-    batch = scaler(batch)"""
-
+    #print(batch.shape) #(32, 10000, 3)
+    #batch = scaler(batch)
+    batch = eval_batch.permute(0, 2, 1,)
+    #print(batch.shape)#(32, 3, 10000)
 
     # Execute one training step
     loss = train_step_fn(state, batch)
@@ -154,9 +146,8 @@ def train(config, workdir):
     # Report the loss on an evaluation dataset periodically
     if step % config.training.eval_freq == 0:
       eval_batch = torch.from_numpy(next(eval_iter)['image']._numpy()).to(config.device).float()
-      eval_batch = eval_batch.permute(0, 3, 1, 2)
-      eval_batch = scaler(eval_batch)
-      eval_batch = torch.unsqueeze(eval_batch,dim=-4)  #  add channel axis for debug
+      eval_batch = eval_batch.permute(0, 2, 1)
+      #eval_batch = scaler(eval_batch)
       eval_loss = eval_step_fn(state, eval_batch)
       logging.info("step: %d, eval_loss: %.5e" % (step, eval_loss.item()))
 
@@ -168,38 +159,20 @@ def train(config, workdir):
 
       # Generate and save samples
       if config.training.snapshot_sampling:
-        print("サンプリングを行います")
-        if config.data.dataset == "SLICE":
-          ema.store(score_model.parameters())
-          ema.copy_to(score_model.parameters())
-          sample, n = sampling_fn(score_model)
-          ema.restore(score_model.parameters())
-          this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
-          tf.io.gfile.makedirs(this_sample_dir)
-          sample = np.clip(sample.cpu().numpy() * 255, 0, 255).astype(np.uint8) #画像用に補正
-          #print(sample.shape) (32, 1, 32, 32, 32)
-
-          for i in range(10):
-            for j in range(batch.shape[32]):
-              Image.fromarray(sample[i][0][j]).save(this_sample_dir + "/" + str(i+1) + "_channel" + str(j+1) + ".png")
-        else:
-          ema.store(score_model.parameters())
-          ema.copy_to(score_model.parameters())
-          sample, n = sampling_fn(score_model)
-          ema.restore(score_model.parameters())
-          this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
-          tf.io.gfile.makedirs(this_sample_dir)
-          nrow = int(np.sqrt(sample.shape[0]))
-          image_grid = make_grid(sample, nrow, padding=2)
-          sample = np.clip(sample.permute(0, 2, 3, 1).cpu().numpy() * 255, 0, 255).astype(np.uint8)
+        ema.store(score_model.parameters())
+        ema.copy_to(score_model.parameters())
+        sample, n = sampling_fn(score_model)
+        ema.restore(score_model.parameters())
+        this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
+        tf.io.gfile.makedirs(this_sample_dir)
+        #print(sample.shape) (32, 10000, 3)
+        sample = sample.permute(0, 2, 1)
+        #print(sample.shape) (32, 3, 10000)
+        for i in range(sample.shape[0]):
           with tf.io.gfile.GFile(
-              os.path.join(this_sample_dir, "sample.np"), "wb") as fout:
-            np.save(fout, sample)
-
-          with tf.io.gfile.GFile(
-              os.path.join(this_sample_dir, "sample.png"), "wb") as fout:
-            save_image(image_grid, fout)
-        
+                os.path.join(this_sample_dir, "sample" + str(i) + ".np"), "wb") as fout:
+              np.save(fout, sample)
+          
 
     
 

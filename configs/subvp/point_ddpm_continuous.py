@@ -16,7 +16,7 @@
 # Lint as: python3
 """Training DDPM with sub-VP SDE."""
 
-from configs.default_slice_configs import get_default_configs
+from configs.default_point_configs import get_default_configs
 
 
 def get_config():

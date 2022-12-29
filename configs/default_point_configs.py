@@ -39,7 +39,7 @@ def get_default_configs():
 
   # data
   config.data = data = ml_collections.ConfigDict()
-  data.dataset = 'SLICE'
+  data.dataset = 'POINT'
   data.image_size = 32
   data.random_flip = True
   data.centered = False
