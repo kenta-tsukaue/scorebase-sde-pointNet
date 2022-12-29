@@ -149,7 +149,8 @@ class DDPM(nn.Module):
         h = modules[m_idx](hs[-1], temb)
         #print("149行 : hの形は", h.shape)
         m_idx += 1
-        if h.shape[-3] in self.attn_resolutions:  #  use x dim
+        print("self,attn_resolutions", self.attn_resolutions)
+        if h.shape[-1] in self.attn_resolutions: 
           #print("152行 : attn_resolutions")
           h = modules[m_idx](h)
           #print(modules[m_idx])
