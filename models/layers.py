@@ -605,7 +605,7 @@ class Downsample(nn.Module):
     self.with_conv = with_conv
 
   def forward(self, x):
-    B, C, H, W, D = x.shape
+    B, C, H = x.shape
     # Emulate 'SAME' padding
     if self.with_conv:
       x = F.pad(x, (0, 1))  
