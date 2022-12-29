@@ -48,7 +48,7 @@ def get_config():
   model.nf = 32
   model.ch_mult = (1, 2, 2, 2)
   model.num_res_blocks = 2
-  model.attn_resolutions = (16,)
+  model.attn_resolutions = (5000,)
   model.resamp_with_conv = True
   model.conditional = True
 
