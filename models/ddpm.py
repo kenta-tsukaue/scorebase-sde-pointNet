@@ -145,7 +145,7 @@ class DDPM(nn.Module):
       for i_block in range(self.num_res_blocks):
         #print("\n\n\n\n======================ブロック開始=========================")
         print(modules[m_idx])
-        print("hs:",hs[-1], "temb:", temb)
+        print("hs:",hs[-1].shape, "temb:", temb.shape)
         h = modules[m_idx](hs[-1], temb)
         #print("149行 : hの形は", h.shape)
         m_idx += 1
