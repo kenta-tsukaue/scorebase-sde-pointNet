@@ -106,7 +106,7 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
       img = tf.image.convert_image_dtype(img, tf.float32)
       return tf.image.resize(img, [config.data.image_size, config.data.image_size], antialias=True)
 
-  elif config.data.dataset == 'SLICE':
+  elif config.data.dataset == 'POINT':
     dataset_builder = tfds.builder(config.data.data_file)
     train_split_name = 'train'
     eval_split_name = 'test'
