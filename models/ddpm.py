@@ -111,7 +111,7 @@ class DDPM(nn.Module):
 
   def forward(self, x, labels):
     modules = self.all_modules
-#    #print("114行 : モジュールたちは\n",modules)
+    print("114行 : モジュールたちは\n",modules)
     
     m_idx = 0
     if self.conditional: #True
@@ -144,8 +144,8 @@ class DDPM(nn.Module):
       # Residual blocks for this resolution
       for i_block in range(self.num_res_blocks):
         #print("\n\n\n\n======================ブロック開始=========================")
-        print(modules[m_idx])
-        print("hs:",hs[-1].shape, "temb:", temb.shape)
+        print(m_idx, modules[m_idx])
+        #print("hs:",hs[-1].shape, "temb:", temb.shape)
         h = modules[m_idx](hs[-1], temb)
         #print("149行 : hの形は", h.shape)
         m_idx += 1
