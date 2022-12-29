@@ -144,24 +144,24 @@ class DDPM(nn.Module):
       # Residual blocks for this resolution
       for i_block in range(self.num_res_blocks):
         #print("\n\n\n\n======================ブロック開始=========================")
-        print(m_idx, modules[m_idx])
+        print(147, m_idx, modules[m_idx])
         #print("hs:",hs[-1].shape, "temb:", temb.shape)
         h = modules[m_idx](hs[-1], temb)
         #print("149行 : hの形は", h.shape)
         m_idx += 1
-        print("self,attn_resolutions", self.attn_resolutions)
+        print("self.attn_resolutions", self.attn_resolutions)
         if h.shape[-1] in self.attn_resolutions: 
           #print("152行 : attn_resolutions")
           h = modules[m_idx](h)
-          #print(modules[m_idx])
-          #print("155行目 : hの形は", h.shape)
+          print(156, m_idx, modules[m_idx])
+          print("157行目 : hの形は", h.shape)
           m_idx += 1
         
         hs.append(h)
       if i_level != self.num_resolutions - 1:
         #print("num_resolution")
-        #print(modules[m_idx])
-        #print("162行目 : hの形は", h.shape)
+        print(163, m_idx, modules[m_idx])
+        print("164行目 : hの形は", h.shape)
         hs.append(modules[m_idx](hs[-1]))
         m_idx += 1
     
