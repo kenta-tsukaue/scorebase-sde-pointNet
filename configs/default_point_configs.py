@@ -44,7 +44,7 @@ def get_default_configs():
   data.random_flip = True
   data.centered = False
   data.uniform_dequantization = False
-  data.num_channels = 1
+  data.num_channels = 3
   data.data_file = "data_set_point_10000"
 
   # model
