@@ -181,6 +181,7 @@ class EulerMaruyamaPredictor(Predictor):
   def update_fn(self, x, t):
     dt = -1. / self.rsde.N
     z = torch.randn_like(x)
+    print(z.shape)
     drift, diffusion = self.rsde.sde(x, t)
     x_mean = x + drift * dt
     x = x_mean + diffusion[:, None, None] * np.sqrt(-dt) * z
@@ -397,9 +398,9 @@ def get_pc_sampler(sde, shape, predictor, corrector, inverse_scaler, snr,
     """
     with torch.no_grad():
       # Initial sample
-      print(shape)
+      #print(shape) (16, 3, 10000)
       x = sde.prior_sampling(shape).to(device)
-      print(x.shape)
+      #print(x.shape) (16, 3, 10000)
       timesteps = torch.linspace(sde.T, eps, sde.N, device=device)
 
       for i in range(sde.N):
