@@ -228,5 +228,5 @@ class DDPM(nn.Module):
       # so no need of doing it here.
       used_sigmas = self.sigmas[labels, None, None, None]
       h = h / used_sigmas
-    #print("229行 : 最終のhの形は", h.shape)
+    print("229行 : 最終のhの形は", h.shape)
     return h
