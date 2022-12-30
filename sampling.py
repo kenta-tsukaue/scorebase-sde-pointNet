@@ -180,8 +180,9 @@ class EulerMaruyamaPredictor(Predictor):
 
   def update_fn(self, x, t):
     dt = -1. / self.rsde.N
+    print(183, x.shape)
     z = torch.randn_like(x)
-    print(z.shape)
+    print(185, z.shape)
     drift, diffusion = self.rsde.sde(x, t)
     x_mean = x + drift * dt
     x = x_mean + diffusion[:, None, None] * np.sqrt(-dt) * z
