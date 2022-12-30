@@ -196,7 +196,7 @@ class DDPM(nn.Module):
         print("194行 : hの形は", h.shape)
         m_idx += 1
 #      if h.shape[-2] in self.attn_resolutions:  #  use y dim
-      if h.shape[-3] in self.attn_resolutions:  #  use x dim
+      if h.shape[-1] in self.attn_resolutions:  #  use x dim
         print("198行 : attn_resolutions入りまーす")
         print(m_idx, modules[m_idx])
         h = modules[m_idx](h)
