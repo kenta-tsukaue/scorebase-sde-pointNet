@@ -397,7 +397,9 @@ def get_pc_sampler(sde, shape, predictor, corrector, inverse_scaler, snr,
     """
     with torch.no_grad():
       # Initial sample
+      print(shape)
       x = sde.prior_sampling(shape).to(device)
+      print(x.shape)
       timesteps = torch.linspace(sde.T, eps, sde.N, device=device)
 
       for i in range(sde.N):
