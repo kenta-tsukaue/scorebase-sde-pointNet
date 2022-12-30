@@ -93,10 +93,14 @@ class SDE(abc.ABC):
       def sde(self, x, t):
         """Create the drift and diffusion functions for the reverse SDE/ODE."""
         drift, diffusion = sde_fn(x, t)
+        print(96, drift.shape, diffusion.shape)
         score = score_fn(x, t)
+        print(98, score.shape)
         drift = drift - diffusion[:, None, None] ** 2 * score * (0.5 if self.probability_flow else 1.)
+        print(100, drift.shape)
         # Set the diffusion function to zero for ODEs.
         diffusion = 0. if self.probability_flow else diffusion
+        print(103, diffusion.shape)
         return drift, diffusion
 
       def discretize(self, x, t):
@@ -140,7 +144,7 @@ class VPSDE(SDE):
 
   def marginal_prob(self, x, t):
     log_mean_coeff = -0.25 * t ** 2 * (self.beta_1 - self.beta_0) - 0.5 * t * self.beta_0
-    mean = torch.exp(log_mean_coeff[:, None, None, None]) * x
+    mean = torch.exp(log_mean_coeff[:, None, None]) * x
     std = torch.sqrt(1. - torch.exp(2. * log_mean_coeff))
     return mean, std
 
@@ -159,7 +163,7 @@ class VPSDE(SDE):
     beta = self.discrete_betas.to(x.device)[timestep]
     alpha = self.alphas.to(x.device)[timestep]
     sqrt_beta = torch.sqrt(beta)
-    f = torch.sqrt(alpha)[:, None, None, None] * x - x
+    f = torch.sqrt(alpha)[:, None, None] * x - x
     G = sqrt_beta
     return f, G
 
