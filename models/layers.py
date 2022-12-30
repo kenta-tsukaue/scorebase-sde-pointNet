@@ -578,7 +578,7 @@ class AttnBlock(nn.Module):
     #w = torch.reshape(w, (B, H, W, H * W))
     w = F.softmax(w, dim=-1)
     #w = torch.reshape(w, (B, H, W, H, W))
-    h = torch.einsum('bhwij,bcij->bchw', w, v)
+    h = torch.einsum('bhi,bcj->bch', w, v)
     return x + h
 
 
