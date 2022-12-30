@@ -165,12 +165,12 @@ def train(config, workdir):
         ema.restore(score_model.parameters())
         this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
         tf.io.gfile.makedirs(this_sample_dir)
-        print(sample.shape) #(32, 3, 10000)
+        #print(sample.shape) #(32, 3, 10000)
         sample = sample.permute(0, 2, 1).cpu().numpy()
-        print(sample.shape) #(32, 10000, 3)
+        #print(sample.shape) #(32, 10000, 3)
         for i in range(sample.shape[0]):
           with tf.io.gfile.GFile(
-                os.path.join(this_sample_dir, "sample" + str(i) + ".np"), "wb") as fout:
+                os.path.join(this_sample_dir, "sample" + str(i+1) + ".np"), "wb") as fout:
               np.save(fout, sample[i])
           
 
