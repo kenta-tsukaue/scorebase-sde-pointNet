@@ -158,15 +158,16 @@ def train(config, workdir):
 
       # Generate and save samples
       if config.training.snapshot_sampling:
+        print("サンプリング開始")
         ema.store(score_model.parameters())
         ema.copy_to(score_model.parameters())
         sample, n = sampling_fn(score_model)
         ema.restore(score_model.parameters())
         this_sample_dir = os.path.join(sample_dir, "iter_{}".format(step))
         tf.io.gfile.makedirs(this_sample_dir)
-        #print(sample.shape) (32, 10000, 3)
-        sample = sample.permute(0, 2, 1)
-        #print(sample.shape) (32, 3, 10000)
+        print(sample.shape) (32, 10000, 3)
+        sample = sample.permute(0, 2, 1).cpu().numpy()
+        print(sample.shape) (32, 3, 10000)
         for i in range(sample.shape[0]):
           with tf.io.gfile.GFile(
                 os.path.join(this_sample_dir, "sample" + str(i) + ".np"), "wb") as fout:
