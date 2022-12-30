@@ -93,14 +93,14 @@ class SDE(abc.ABC):
       def sde(self, x, t):
         """Create the drift and diffusion functions for the reverse SDE/ODE."""
         drift, diffusion = sde_fn(x, t)
-        print(96, drift.shape, diffusion.shape)
+        #print(96, drift.shape, diffusion.shape)
         score = score_fn(x, t)
-        print(98, score.shape)
+        #print(98, score.shape)
         drift = drift - diffusion[:, None, None] ** 2 * score * (0.5 if self.probability_flow else 1.)
-        print(100, drift.shape)
+        #print(100, drift.shape)
         # Set the diffusion function to zero for ODEs.
         diffusion = 0. if self.probability_flow else diffusion
-        print(103, diffusion.shape)
+        #print(103, diffusion.shape)
         return drift, diffusion
 
       def discretize(self, x, t):
