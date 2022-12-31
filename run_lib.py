@@ -130,8 +130,9 @@ def train(config, workdir):
     batch = torch.from_numpy(next(train_iter)['image']._numpy()).to(config.device).float()
     #print(batch.shape) #(32, 10000, 3)
     #batch = scaler(batch)
-    rng = np.random.default_rng() #乱数発生のためのジェネレータオブジェクト
-    batch = rng.permutation(batch, axis=1) #ランダムに入れ替える
+    #axis = 1で並び替え
+    idx = torch.randperm(batch.size(1))
+    batch = batch[:, idx]
     #バッチの内容を確認
     if step == 0:
       check_batch = batch.cpu().numpy()
@@ -141,6 +142,7 @@ def train(config, workdir):
           with tf.io.gfile.GFile(
                 os.path.join(batch_dir, "batch" + str(i+1) + ".np"), "wb") as fout:
               np.save(fout, check_batch[i])
+    batch 
     batch = batch.permute(0, 2, 1)
     #print(batch.shape)#(32, 3, 10000)
 
