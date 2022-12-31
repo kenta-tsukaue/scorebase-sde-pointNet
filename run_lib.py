@@ -131,7 +131,7 @@ def train(config, workdir):
     #print(batch.shape) #(32, 10000, 3)
     #batch = scaler(batch)
     rng = np.random.default_rng() #乱数発生のためのジェネレータオブジェクト
-    batch = rng.permutation(rng, 1) #ランダムに入れ替える
+    batch = rng.permutation(rng, axis=1) #ランダムに入れ替える
     batch = batch.permute(0, 2, 1)
     #print(batch.shape)#(32, 3, 10000)
 
