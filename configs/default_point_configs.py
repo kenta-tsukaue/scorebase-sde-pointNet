@@ -45,7 +45,7 @@ def get_default_configs():
   data.centered = False
   data.uniform_dequantization = False
   data.num_channels = 3
-  data.data_file = "data_set_point_10000"
+  data.data_file = "data_set_point_10000_2"
 
   # model
   config.model = model = ml_collections.ConfigDict()
