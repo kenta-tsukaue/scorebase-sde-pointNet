@@ -132,6 +132,14 @@ def train(config, workdir):
     #batch = scaler(batch)
     rng = np.random.default_rng() #乱数発生のためのジェネレータオブジェクト
     batch = rng.permutation(batch, axis=1) #ランダムに入れ替える
+    #バッチの内容を確認
+    if step == 0:
+      batch_dir = "/public/tsukaue/graduation/sde-1conv/check_batch"
+      tf.io.gfile.makedirs(this_sample_dir)
+      for i in range(batch.shape[0]):
+          with tf.io.gfile.GFile(
+                os.path.join(batch_dir, "batch" + str(i+1) + ".np"), "wb") as fout:
+              np.save(fout, sample[i])
     batch = batch.permute(0, 2, 1)
     #print(batch.shape)#(32, 3, 10000)
 
