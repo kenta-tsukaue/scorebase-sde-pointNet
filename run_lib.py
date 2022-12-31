@@ -137,7 +137,7 @@ def train(config, workdir):
     if step == 0:
       check_batch = batch.cpu().numpy()
       batch_dir = "/public/tsukaue/graduation/sde-1conv/check_batch"
-      tf.io.gfile.makedirs(this_sample_dir)
+      tf.io.gfile.makedirs(batch_dir)
       for i in range(batch.shape[0]):
           with tf.io.gfile.GFile(
                 os.path.join(batch_dir, "batch" + str(i+1) + ".np"), "wb") as fout:
