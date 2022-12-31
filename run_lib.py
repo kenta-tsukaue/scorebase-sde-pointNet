@@ -135,7 +135,7 @@ def train(config, workdir):
     batch = batch[:, idx]
     #axis = 2で並び替え
     idx_2 = torch.randperm(batch.size(2))
-    batch = batch[:, : idx_2]
+    batch = batch[:, :, idx_2]
     #バッチの内容を確認
     if step == 0:
       check_batch = batch.cpu().numpy()
