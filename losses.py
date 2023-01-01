@@ -81,7 +81,7 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
     ##print(81, "バッチの形は" + str(batch.shape)) #: (32, 1, 10000, 3)
     score_fn = mutils.get_score_fn(sde, model, train=train, continuous=continuous)
     t = torch.rand(batch.shape[0], device=batch.device) * (sde.T - eps) + eps
-    z = torch.randn_like(batch) #zは加えるノイズのこと
+    z = torch.randn_like(batch) / 10 #zは加えるノイズのこと
     """範囲を表示(z)"""
     x_min = 0
     x_max = 0
