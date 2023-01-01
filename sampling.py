@@ -205,9 +205,9 @@ class EulerMaruyamaPredictor(Predictor):
             z_max = i[2]
         elif i[2] < z_min:
             z_min = i[2]
-    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
-    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
+    print("======x======\n" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+    print("======y======\n" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+    print("======z======\n" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
     #print(185, z.shape)
     drift, diffusion = self.rsde.sde(x, t)
     #print(187, drift.shape, diffusion.shape)
@@ -237,9 +237,9 @@ class EulerMaruyamaPredictor(Predictor):
             z_max = i[2]
         elif i[2] < z_min:
             z_min = i[2]
-    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
-    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
+    print("======x======\n" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+    print("======y======\n" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+    print("======z======\n" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
     #print(191, x.shape)
     return x, x_mean
 
@@ -479,13 +479,14 @@ def get_pc_sampler(sde, shape, predictor, corrector, inverse_scaler, snr,
               z_max = i[2]
           elif i[2] < z_min:
               z_min = i[2]
-      print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
-      print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-      print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
+      print("======x======\n" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+      print("======y======\n" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+      print("======z======\n" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
       ##print(x.shape) (16, 3, 10000)
       timesteps = torch.linspace(sde.T, eps, sde.N, device=device)
 
       for i in range(sde.N):
+        print("\n\n==============", i, "/",  sde.N, "=================")
         t = timesteps[i]
         vec_t = torch.ones(shape[0], device=t.device) * t
         x, x_mean = corrector_update_fn(x, vec_t, model=model)
