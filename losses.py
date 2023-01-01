@@ -82,7 +82,7 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
     score_fn = mutils.get_score_fn(sde, model, train=train, continuous=continuous)
     t = torch.rand(batch.shape[0], device=batch.device) * (sde.T - eps) + eps
     z = torch.randn_like(batch) / 10 #zは加えるノイズのこと
-    """範囲を表示(z)"""
+    """範囲を表示(z)
     x_min = 0
     x_max = 0
     y_min = 0
@@ -106,13 +106,13 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
             z_min = i[2]
     print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
     print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
+    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))"""
     #print(85, t.shape, z.shape)
     mean, std = sde.marginal_prob(batch, t)
     #print(87, mean.shape, std.shape)
     perturbed_data = mean + std[:, None, None] * z
 
-    """範囲を表示(perturbed_data)"""
+    """範囲を表示(perturbed_data)
     x_min = 0
     x_max = 0
     y_min = 0
@@ -136,7 +136,7 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
             z_min = i[2]
     print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
     print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
+    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))"""
 
     #print(89, perturbed_data.shape)
     # #print("データの形は" + str(perturbed_data.shape))

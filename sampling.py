@@ -181,13 +181,65 @@ class EulerMaruyamaPredictor(Predictor):
   def update_fn(self, x, t):
     dt = -1. / self.rsde.N
     #print(183, x.shape)
-    z = torch.randn_like(x)
+    z = torch.randn_like(x) / 10
+    """範囲を表示(sampling_z)"""
+    print("=======sampling_z=======")
+    x_min = 0
+    x_max = 0
+    y_min = 0
+    y_max = 0
+    z_min = 0
+    z_max = 0
+    for i in x[0]:
+        if i[0] > x_max:
+            x_max = i[0]
+        elif i[0] < x_min:
+            x_min = i[0]
+
+        if i[1] > y_max:
+            y_max = i[1]
+        elif i[1] < y_min:
+            y_min = i[1]
+
+        if i[2] > z_max:
+            z_max = i[2]
+        elif i[2] < z_min:
+            z_min = i[2]
+    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
     #print(185, z.shape)
     drift, diffusion = self.rsde.sde(x, t)
     #print(187, drift.shape, diffusion.shape)
     x_mean = x + drift * dt
     #print(189, x_mean.shape)
     x = x_mean + diffusion[:, None, None] * np.sqrt(-dt) * z
+    """範囲を表示(sampling_x)"""
+    print("=======sampling_x=======")
+    x_min = 0
+    x_max = 0
+    y_min = 0
+    y_max = 0
+    z_min = 0
+    z_max = 0
+    for i in x[0]:
+        if i[0] > x_max:
+            x_max = i[0]
+        elif i[0] < x_min:
+            x_min = i[0]
+
+        if i[1] > y_max:
+            y_max = i[1]
+        elif i[1] < y_min:
+            y_min = i[1]
+
+        if i[2] > z_max:
+            z_max = i[2]
+        elif i[2] < z_min:
+            z_min = i[2]
+    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
     #print(191, x.shape)
     return x, x_mean
 
@@ -403,7 +455,33 @@ def get_pc_sampler(sde, shape, predictor, corrector, inverse_scaler, snr,
     with torch.no_grad():
       # Initial sample
       ##print(shape) (16, 3, 10000)
-      x = sde.prior_sampling(shape).to(device)
+      x = sde.prior_sampling(shape).to(device) / 10
+      """範囲を表示(sampling)"""
+      print("=======sampling=======")
+      x_min = 0
+      x_max = 0
+      y_min = 0
+      y_max = 0
+      z_min = 0
+      z_max = 0
+      for i in x[0]:
+          if i[0] > x_max:
+              x_max = i[0]
+          elif i[0] < x_min:
+              x_min = i[0]
+
+          if i[1] > y_max:
+              y_max = i[1]
+          elif i[1] < y_min:
+              y_min = i[1]
+
+          if i[2] > z_max:
+              z_max = i[2]
+          elif i[2] < z_min:
+              z_min = i[2]
+      print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
+      print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
+      print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))
       ##print(x.shape) (16, 3, 10000)
       timesteps = torch.linspace(sde.T, eps, sde.N, device=device)
 
