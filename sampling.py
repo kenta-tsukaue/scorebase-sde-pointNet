@@ -181,7 +181,7 @@ class EulerMaruyamaPredictor(Predictor):
   def update_fn(self, x, t):
     dt = -1. / self.rsde.N
     #print(183, x.shape)
-    z = torch.randn_like(x) / 10
+    z = torch.randn_like(x)
     """範囲を表示(sampling_z)
     print("=======sampling_z=======")
     x_min = 0
@@ -455,7 +455,7 @@ def get_pc_sampler(sde, shape, predictor, corrector, inverse_scaler, snr,
     with torch.no_grad():
       # Initial sample
       ##print(shape) (16, 3, 10000)
-      x = sde.prior_sampling(shape).to(device) / 10
+      x = sde.prior_sampling(shape).to(device)
       """範囲を表示(sampling)
       print("=======sampling=======")
       x_min = 0
