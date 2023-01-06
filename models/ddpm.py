@@ -87,7 +87,7 @@ class InputTNet(nn.Module):
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
         print("InputTNet開始！")
-        input_data = input_data.permute(0, 2, 1)
+        #input_data = input_data.permute(0, 2, 1)
         matrix = self.main(input_data).view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
         out = out.view(-1, 3)
@@ -112,7 +112,7 @@ class FeatureTNet(nn.Module):
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
-        input_data = input_data.permute(0, 2, 1)
+        #input_data = input_data.permute(0, 2, 1)
         matrix = self.main(input_data).view(-1, 64, 64)
         out = torch.matmul(input_data.view(-1, self.num_points, 64), matrix)
         out = out.view(-1, 64)
