@@ -53,10 +53,12 @@ class NonLinear(nn.Module):
 
     def forward(self, input_data):
         print("NonLinear開始！")
+        h = input_data.permute(0, 2, 1)
         h = self.Linear(input_data)
         print(57,h.shape)
         h = self.ReLU(h)
         print(59,h.shape)
+        h = h.permute(0, 2, 1)
         h = self.BatchNorm1d(h)
         print(61, h.shape)
         return h
@@ -136,10 +138,10 @@ class DDPM(nn.Module):
         self.num_channels = config.data.num_channels
 
         self.main = nn.Sequential(
-            #InputTNet(self.num_points),
+            InputTNet(self.num_points),
             NonLinear(3, 64),
             NonLinear(64, 64),
-            #FeatureTNet(self.num_points),
+            FeatureTNet(self.num_points),
             NonLinear(64, 64),
             NonLinear(64, 128),
             NonLinear(128, 1024),
