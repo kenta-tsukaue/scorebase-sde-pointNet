@@ -51,5 +51,6 @@ def get_config():
   model.attn_resolutions = (5000,)
   model.resamp_with_conv = True
   model.conditional = True
+  model.num_points = 10000
 
   return config
