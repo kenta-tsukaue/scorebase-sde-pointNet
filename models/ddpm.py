@@ -76,6 +76,7 @@ class MaxPool(nn.Module):
         out = input_data.view(-1, self.num_channels, self.num_points)
         out = self.main(out)
         out = out.view(-1, self.num_channels)
+        print(out.shape)
         return out
 
 
