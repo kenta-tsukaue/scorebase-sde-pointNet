@@ -136,7 +136,7 @@ def train(config, workdir):
     #axis = 2で並び替え
     idx_2 = torch.randperm(batch.size(2))
     batch = batch[:, :, idx_2]
-    batch = batch.permute(0, 2, 1)
+    #batch = batch.permute(0, 2, 1)
     #print(batch.shape)#(32, 3, 10000)
 
     # Execute one training step
@@ -151,7 +151,7 @@ def train(config, workdir):
     # Report the loss on an evaluation dataset periodically
     if step % config.training.eval_freq == 0:
       eval_batch = torch.from_numpy(next(eval_iter)['image']._numpy()).to(config.device).float()
-      eval_batch = eval_batch.permute(0, 2, 1)
+      #eval_batch = eval_batch.permute(0, 2, 1)
       #eval_batch = scaler(eval_batch)
       eval_loss = eval_step_fn(state, eval_batch)
       logging.info("step: %d, eval_loss: %.5e" % (step, eval_loss.item()))
