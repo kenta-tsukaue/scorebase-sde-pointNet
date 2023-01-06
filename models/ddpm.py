@@ -53,12 +53,16 @@ class NonLinear(nn.Module):
 
     def forward(self, input_data):
         print("NonLinear開始！")
-        h = input_data.permute(0, 2, 1)
+        print("dim()", input_data.dim())
+        if input_data.dim() == 3:
+          h = input_data.permute(0, 2, 1)
         h = self.Linear(h)
         print(57,h.shape)
         h = self.ReLU(h)
         print(59,h.shape)
-        h = h.permute(0, 2, 1)
+        print("dim()", h.dim())
+        if h.dim() == 3:
+          h = h.permute(0, 2, 1)
         h = self.BatchNorm1d(h)
         print(61, h.shape)
         return h
