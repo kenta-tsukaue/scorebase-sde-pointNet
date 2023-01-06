@@ -119,7 +119,7 @@ class FeatureTNet(nn.Module):
 class DDPM(nn.Module):
     def __init__(self, config):
         super(DDPM, self).__init__()
-        self.num_points = config.modelnum_points
+        self.num_points = config.model.num_points
         self.num_channels = config.data.num_channels
 
         self.main = nn.Sequential(
