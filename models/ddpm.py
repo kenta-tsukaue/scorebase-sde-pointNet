@@ -85,6 +85,7 @@ class InputTNet(nn.Module):
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
+        print(input_data.shape)
         matrix = self.main(input_data).view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
         out = out.view(-1, 3)
