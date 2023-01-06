@@ -136,10 +136,10 @@ class DDPM(nn.Module):
         self.num_channels = config.data.num_channels
 
         self.main = nn.Sequential(
-            InputTNet(self.num_points),
+            #InputTNet(self.num_points),
             NonLinear(3, 64),
             NonLinear(64, 64),
-            FeatureTNet(self.num_points),
+            #FeatureTNet(self.num_points),
             NonLinear(64, 64),
             NonLinear(64, 128),
             NonLinear(128, 1024),
