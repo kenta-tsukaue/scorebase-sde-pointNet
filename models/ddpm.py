@@ -49,6 +49,7 @@ class NonLinear(nn.Module):
             nn.BatchNorm1d(self.output_channels))
 
     def forward(self, input_data):
+        print("NonLinear開始！")
         return self.main(input_data)
 
 
@@ -85,6 +86,7 @@ class InputTNet(nn.Module):
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
+        print("InputTNet開始！")
         input_data = input_data.permute(0, 2, 1)
         matrix = self.main(input_data).view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
