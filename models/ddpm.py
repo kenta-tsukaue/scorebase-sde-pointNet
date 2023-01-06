@@ -54,6 +54,7 @@ class NonLinear(nn.Module):
     def forward(self, input_data):
         print("NonLinear開始！")
         print("dim()", input_data.dim())
+        h = input_data
         if input_data.dim() == 3:
           h = input_data.permute(0, 2, 1)
         h = self.Linear(h)
