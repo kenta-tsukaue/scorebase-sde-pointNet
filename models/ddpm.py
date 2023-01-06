@@ -152,25 +152,40 @@ class DDPM(nn.Module):
 
     def forward(self, x, t):
       h1 = self.InputTNet(x) #(3, 10000)
+      print("h1",h1.shape)
       h2 = self.NonLinear_1(h1) #(64, 10000)
+      print("h2",h2.shape)
       h3 = self.NonLinear_2(h2) #(64, 10000)
+      print("h3",h3.shape)
       h4 = self.FeatureTNet(h3) # local feature (64, 10000)
+      print("h4",h4.shape)
 
       h5 = self.NonLinear_3(h4) #(64, 10000)
+      print("h5",h5.shape)
       h6 = self.NonLinear_4(h5) #(128, 10000)
+      print("h6",h6.shape)
       h7 = self.NonLinear_5(h6) #(1024, 10000)
+      print("h7",h7.shape)
       h8 = self.MaxPool(h7) #global feature (1024, 1)
+      print("h8",h8.shape)
 
       #まずh8を(1024,1)から(1024,10000)に変更する
       while h8.shape[2] < 10000:
         h8 = torch.cat((h8, h8), dim=2)
+        print("h8",h8.shape)
+      print("h8",h8.shape)
       #h4にh8を結合
       h9 = torch.cat((h4, h8), dim=1) #(1088, 10000)
+      print("h9",h9.shape)
 
       h10 = self.NonLinear_6(h9)
+      print("h10",h10.shape)
       h11 = self.NonLinear_7(h10)
+      print("h11",h11.shape)
       h12 = self.NonLinear_8(h11)
+      print("h12",h12.shape)
       h13 = self.NonLinear_9(h12)
+      print("h13",h13.shape)
 
       return h13
 
