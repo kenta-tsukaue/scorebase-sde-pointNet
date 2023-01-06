@@ -54,7 +54,7 @@ class NonLinear(nn.Module):
     def forward(self, input_data):
         print("NonLinear開始！")
         h = input_data.permute(0, 2, 1)
-        h = self.Linear(input_data)
+        h = self.Linear(h)
         print(57,h.shape)
         h = self.ReLU(h)
         print(59,h.shape)
@@ -98,7 +98,6 @@ class InputTNet(nn.Module):
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
         print("InputTNet開始!")
-        #input_data = input_data.permute(0, 2, 1)
         matrix = self.main(input_data).view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
         out = out.view(-1, 3)
