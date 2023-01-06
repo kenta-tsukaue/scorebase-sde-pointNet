@@ -43,14 +43,23 @@ class NonLinear(nn.Module):
         self.input_channels = input_channels
         self.output_channels = output_channels
 
-        self.main = nn.Sequential(
-            nn.Linear(self.input_channels, self.output_channels),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(self.output_channels))
+        #self.main = nn.Sequential(
+        #    nn.Linear(self.input_channels, self.output_channels),
+        #    nn.ReLU(inplace=True),
+        #    nn.BatchNorm1d(self.output_channels))
+        self.Linear = nn.Linear(self.input_channels, self.output_channels)
+        self.ReLU = nn.ReLU(inplace=True)
+        self.BatchNorm1d = nn.BatchNorm1d(self.output_channels)
 
     def forward(self, input_data):
         print("NonLinear開始！")
-        return self.main(input_data)
+        h = self.Linear(input_data)
+        print(57,h.shape)
+        h = self.ReLU(h)
+        print(59,h.shape)
+        h = self.BatchNorm1d(h)
+        print(61, h.shape)
+        return h
 
 
 
