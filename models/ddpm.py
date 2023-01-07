@@ -230,9 +230,11 @@ class DDPM(nn.Module):
       print("h7",h7.shape)
       h8 = self.MaxPool(h7) #global feature (1024, 1)
       print("h8",h8.shape)
-
+      #次元を増やす
+      h8 = h8.unsqueeze(dim=-1) 
+      print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
-      while h8.shape[1] < 10000:
+      while h8.shape[2] < 10000:
         h8 = torch.cat((h8, h8), dim=2)
         print("h8",h8.shape)
       print("h8",h8.shape)
