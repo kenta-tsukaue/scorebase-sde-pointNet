@@ -227,7 +227,7 @@ class DDPM(nn.Module):
       h7 = self.NonLinear_5(h6) #(1024, 10000)
       h8 = self.MaxPool(h7) #global feature (1024, 1)
       #次元を増やす
-      h8 = h8.unsqueeze(dim=-1)
+      #h8 = h8.unsqueeze(dim=-1)
       #h8_pre = torch.cat((h8, h8), dim=2)
       #h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
       #print("h8",h8.shape)
