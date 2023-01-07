@@ -227,17 +227,19 @@ class DDPM(nn.Module):
       h7 = self.NonLinear_5(h6) #(1024, 10000)
       h8 = self.MaxPool(h7) #global feature (1024, 1)
       #次元を増やす
-      #h8 = h8.unsqueeze(dim=-1)
-      #h8_pre = torch.cat((h8, h8), dim=2)
-      #h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
+      h8 = h8.unsqueeze(dim=-1)
+      h8_pre = torch.cat((h8, h8), dim=2)
+      h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
+      h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
+      h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
       #print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
-      #while h8.shape[2] < 8000:
-      #  h8 = torch.cat((h8, h8), dim=2)
-      #  #print("h8",h8.shape)
-      #xwhile h8.shape[2] < 10000:
-      #  h8 = torch.cat((h8, h8_pre), dim=2)
-      #print("h8",h8.shape)
+      while h8.shape[2] < 8000:
+        h8 = torch.cat((h8, h8), dim=2)
+        #print("h8",h8.shape)
+      while h8.shape[2] < 10000:
+        h8 = torch.cat((h8, h8_pre), dim=2)
+      print("h8",h8.shape)
       #h4にh8を結合
       h9 = torch.cat((h4, h8), dim=1) #(1088, 10000)
       #print("h9",h9.shape)
