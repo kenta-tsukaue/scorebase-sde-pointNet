@@ -37,11 +37,12 @@ get_normalization = normalization.get_normalization
 default_initializer = layers.default_init
 
 class InputTNet(nn.Module):
-    def __init__(self, num_points, batch_size):
+    def __init__(self, num_points, batch_size, act):
         super(InputTNet, self).__init__()
         self.num_points = num_points
         self.batch_size = batch_size
         self.k = 3
+        self.act = act
 
         #改良後
         self.conv1 = nn.Conv1d(3,64,1)
@@ -62,15 +63,15 @@ class InputTNet(nn.Module):
         ##print("InputTNet開始!") input_data.shape == (16, 10000, 3)
 
         #改良後
-        h = F.relu(self.bn1(self.conv1(input_data)))
-        h = F.relu(self.bn2(self.conv2(h)))
-        h = F.relu(self.bn3(self.conv3(h)))
+        h = self.act(self.bn1(self.conv1(input_data)))
+        h = self.act(self.bn2(self.conv2(h)))
+        h = self.act(self.bn3(self.conv3(h)))
         pool = nn.MaxPool1d(h.size(-1))(h)
         ##print("pool", pool.shape)
         flat = nn.Flatten(1)(pool) #(16, 9216)
 
-        h = F.relu(self.bn4(self.fc1(flat)))
-        h = F.relu(self.bn5(self.fc2(h)))
+        h = self.act(self.bn4(self.fc1(flat)))
+        h = self.act(self.bn5(self.fc2(h)))
 
         #initialize as identity
         init = torch.eye(self.k, requires_grad=True).repeat(self.batch_size,1,1)
@@ -83,12 +84,13 @@ class InputTNet(nn.Module):
 
 
 class FeatureTNet(nn.Module):
-    def __init__(self, num_points, batch_size):
+    def __init__(self, num_points, batch_size, act):
         super(FeatureTNet, self).__init__()
         self.num_points = num_points
         self.k = 64
         self.batch_size = batch_size
-
+        self.act = act
+        
         #改良後
         self.conv1 = nn.Conv1d(64,64,1)
         self.conv2 = nn.Conv1d(64,128,1)
@@ -109,14 +111,14 @@ class FeatureTNet(nn.Module):
         ##print("FeatureTNet開始!")
         ##print(input_data.shape)
         #改良後
-        h = F.relu(self.bn1(self.conv1(input_data)))
-        h = F.relu(self.bn2(self.conv2(h)))
-        h = F.relu(self.bn3(self.conv3(h)))
+        h = self.act(self.bn1(self.conv1(input_data)))
+        h = self.act(self.bn2(self.conv2(h)))
+        h = self.act(self.bn3(self.conv3(h)))
         pool = nn.MaxPool1d(h.size(-1))(h)
         flat = nn.Flatten(1)(pool)
 
-        h = F.relu(self.bn4(self.fc1(flat)))
-        h = F.relu(self.bn5(self.fc2(h)))
+        h = self.act(self.bn4(self.fc1(flat)))
+        h = self.act(self.bn5(self.fc2(h)))
 
         #initialize as identity
         init = torch.eye(self.k, requires_grad=True).repeat(self.batch_size,1,1)
@@ -145,8 +147,8 @@ class DDPM(nn.Module):
         ResnetBlock = functools.partial(ResnetBlockDDPM, temb_dim=4 * nf, dropout=dropout)
 
         nn.init.zeros_(modules[1].bias)
-        self.InputTNet = InputTNet(self.num_points, self.batch_size)
-        self.FeatureTNet = FeatureTNet(self.num_points, self.batch_size)
+        self.InputTNet = InputTNet(self.num_points, self.batch_size, self.act)
+        self.FeatureTNet = FeatureTNet(self.num_points, self.batch_size, self.act)
         self.conv1 = nn.Conv1d(3,64,1)
         self.conv1_1 = nn.Conv1d(64,64,1)
 
@@ -189,15 +191,15 @@ class DDPM(nn.Module):
       temb = modules[1](self.act(temb))
       #print(temb)
 
-      h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
+      h = self.act(self.bn1(self.conv1(self.InputTNet(x))))
       h = self.resNet1(h, temb)
       ##print(281, h.shape)
-      h = F.relu(self.bn1_1(self.conv1_1(h)))
+      h = self.act(self.bn1_1(self.conv1_1(h)))
       ##print(283, h.shape)
       h = self.FeatureTNet(h)
       h_64 = h
       h = self.resNet2(h, temb)
-      h = F.relu(self.bn2(self.conv2(h)))
+      h = self.act(self.bn2(self.conv2(h)))
       h = self.resNet3(h, temb)
       h = self.bn3(self.conv3(h))
       #print(288, h.shape)
@@ -222,11 +224,11 @@ class DDPM(nn.Module):
       #h4にh8を結合
       h = torch.cat((h_64, global_vector), dim=1) #(1088, 10000)
 
-      h = F.relu(self.bn4(self.conv4(h)))
+      h = self.act(self.bn4(self.conv4(h)))
       h = self.resNet4(h, temb)
-      h = F.relu(self.bn5(self.conv5(h)))
+      h = self.act(self.bn5(self.conv5(h)))
       h = self.resNet5(h, temb)
-      h = F.relu(self.bn6(self.conv6(h)))
+      h = self.act(self.bn6(self.conv6(h)))
       h = self.bn7(self.conv7(h))
 
       return h

@@ -664,4 +664,5 @@ class ResnetBlockDDPM(nn.Module):
         x = self.Conv_2(x)
       else:
         x = self.NIN_0(x)
+    
     return x + h
