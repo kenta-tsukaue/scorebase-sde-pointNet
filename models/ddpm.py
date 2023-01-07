@@ -123,8 +123,8 @@ class InputTNet(nn.Module):
         h = self.Linear(h)
         print(124, h.shape)
         matrix = h.view(-1, 3, 3)
-        out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
-        out = out.view(-1, 3)
+        out = torch.matmul(input_data.permute(0, 2, 1), matrix)
+        out = out.permute(0, 2, 1)
         return out
 
 
