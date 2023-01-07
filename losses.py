@@ -78,68 +78,13 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
     Returns:
       loss: A scalar that represents the average loss value across the mini-batch.
     """
-    ##print(81, "バッチの形は" + str(batch.shape)) #: (32, 1, 10000, 3)
     score_fn = mutils.get_score_fn(sde, model, train=train, continuous=continuous)
     t = torch.rand(batch.shape[0], device=batch.device) * (sde.T - eps) + eps
     z = torch.randn_like(batch) #zは加えるノイズのこと
-    """範囲を表示(z)
-    x_min = 0
-    x_max = 0
-    y_min = 0
-    y_max = 0
-    z_min = 0
-    z_max = 0
-    for i in z[0]:
-        if i[0] > x_max:
-            x_max = i[0]
-        elif i[0] < x_min:
-            x_min = i[0]
 
-        if i[1] > y_max:
-            y_max = i[1]
-        elif i[1] < y_min:
-            y_min = i[1]
-
-        if i[2] > z_max:
-            z_max = i[2]
-        elif i[2] < z_min:
-            z_min = i[2]
-    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
-    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))"""
-    #print(85, t.shape, z.shape)
     mean, std = sde.marginal_prob(batch, t)
-    #print(87, mean.shape, std.shape)
     perturbed_data = mean + std[:, None, None] * z
 
-    """範囲を表示(perturbed_data)
-    x_min = 0
-    x_max = 0
-    y_min = 0
-    y_max = 0
-    z_min = 0
-    z_max = 0
-    for i in perturbed_data[0]:
-        if i[0] > x_max:
-            x_max = i[0]
-        elif i[0] < x_min:
-            x_min = i[0]
-
-        if i[1] > y_max:
-            y_max = i[1]
-        elif i[1] < y_min:
-            y_min = i[1]
-
-        if i[2] > z_max:
-            z_max = i[2]
-        elif i[2] < z_min:
-            z_min = i[2]
-    print("======x======" + "最小値:" + str(x_min) + "\n最大値" + str(x_max))
-    print("======y======" + "最小値:" + str(y_min) + "\n最大値" + str(y_max))
-    print("======z======" + "最小値:" + str(z_min) + "\n最大値" + str(z_max))"""
-
-    #print(89, perturbed_data.shape)
-    # #print("データの形は" + str(perturbed_data.shape))
     score = score_fn(perturbed_data, t)# DDPMに渡すのはノイズが加えられたデータ
     # このscoreは結局何を出しているかと言うと、加えたノイズを出している
 
