@@ -290,8 +290,6 @@ class DDPM(nn.Module):
       print(290, global_vector.shape)
       #global_vector = nn.Flatten(1)(h)
       print(292, global_vector.shape)
-      #次元を増やす
-      global_vector = global_vector.unsqueeze(dim=-1)
       print(295, global_vector.shape)
       global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
