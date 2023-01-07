@@ -23,7 +23,7 @@ import sys
 import torch
 import torch.nn as nn
 import functools
-
+import torch.nn.functional as F
 from . import utils, layers, normalization
 
 RefineBlock = layers.RefineBlock
@@ -90,29 +90,34 @@ class InputTNet(nn.Module):
     def __init__(self, num_points):
         super(InputTNet, self).__init__()
         self.num_points = num_points
-
-        self.main = nn.Sequential(
-            NonLinear(3, 64),
-            NonLinear(64, 128),
-            NonLinear(128, 1024),
-            MaxPool(1024, self.num_points),
-            NonLinear(1024, 512),
-            NonLinear(512, 256),
-            nn.Linear(256, 9)
-        )
+        self.k = 3
+        """改良前
         self.NonLinear_1 = NonLinear(3, 64)
         self.NonLinear_2 = NonLinear(64, 128)
         self.NonLinear_3 = NonLinear(128, 1024)
         self.NonLinear_4 = NonLinear(1024, 512)
         self.NonLinear_5 = NonLinear(512, 256)
-
         self.Linear = nn.Linear(256, 9)
+        self.MaxPool = MaxPool(1024, self.num_points)"""
 
-        self.MaxPool = MaxPool(1024, self.num_points)
+        #改良後
+        self.conv1 = nn.Conv1d(3,64,1)
+        self.conv2 = nn.Conv1d(64,128,1)
+        self.conv3 = nn.Conv1d(128,1024,1)
+        self.fc1 = nn.Linear(1024,512)
+        self.fc2 = nn.Linear(512,256)
+        self.fc3 = nn.Linear(256,9)
+
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
-        #print("InputTNet開始!")
+        #print("InputTNet開始!") input_data.shape == (16, 10000, 3)
+        """改良前
         h = self.NonLinear_1(input_data)
         h = self.NonLinear_2(h)
         h = self.NonLinear_3(h)
@@ -125,7 +130,25 @@ class InputTNet(nn.Module):
         matrix = h.view(-1, 3, 3)
         out = torch.matmul(input_data.permute(0, 2, 1), matrix)
         out = out.permute(0, 2, 1)
-        return out
+        return out"""
+
+        #改良後
+        h = F.relu(self.bn1(self.conv1(input_data)))
+        h = F.relu(self.bn2(self.conv2(h)))
+        h = F.relu(self.bn3(self.conv3(h)))
+        pool = nn.MaxPool1d(h.size(-2))(h)
+        flat = nn.Flatten(1)(pool)
+
+        h = F.relu(self.bn4(self.fc1(flat)))
+        h = F.relu(self.bn5(self.fc2(h)))
+
+        #initialize as identity
+        init = torch.eye(self.k, requires_grad=True).repeat(16,1,1)
+        if h.is_cuda:
+            init=init.cuda()
+        matrix = self.fc3(h).view(-1,self.k,self.k) + init
+        output = torch.bmm(torch.transpose(input_data,1,2), matrix).transpose(1,2)
+        return output
 
 
 
@@ -133,16 +156,8 @@ class FeatureTNet(nn.Module):
     def __init__(self, num_points):
         super(FeatureTNet, self).__init__()
         self.num_points = num_points
-
-        self.main = nn.Sequential(
-            NonLinear(64, 64),
-            NonLinear(64, 128),
-            NonLinear(128, 1024),
-            MaxPool(1024, self.num_points),
-            NonLinear(1024, 512),
-            NonLinear(512, 256),
-            nn.Linear(256, 4096)
-        )
+        self.k = 64
+        """改良前
         self.NonLinear_1 = NonLinear(64, 64)
         self.NonLinear_2 = NonLinear(64, 128)
         self.NonLinear_3 = NonLinear(128, 1024)
@@ -152,12 +167,46 @@ class FeatureTNet(nn.Module):
         self.Linear = nn.Linear(256, 4096)
 
         self.MaxPool = MaxPool(1024, self.num_points)
+        """
 
+        #改良後
+        self.conv1 = nn.Conv1d(64,64,1)
+        self.conv2 = nn.Conv1d(64,128,1)
+        self.conv3 = nn.Conv1d(128,1024,1)
+        self.fc1 = nn.Linear(1024,512)
+        self.fc2 = nn.Linear(512,256)
+        self.fc3 = nn.Linear(256,9)
+
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
+        #改良後
         #print("FeatureTNet開始!")
         #print(input_data.shape)
+        #改良後
+        h = F.relu(self.bn1(self.conv1(input_data)))
+        h = F.relu(self.bn2(self.conv2(h)))
+        h = F.relu(self.bn3(self.conv3(h)))
+        pool = nn.MaxPool1d(h.size(-2))(h)
+        flat = nn.Flatten(1)(pool)
+
+        h = F.relu(self.bn4(self.fc1(flat)))
+        h = F.relu(self.bn5(self.fc2(h)))
+
+        #initialize as identity
+        init = torch.eye(self.k, requires_grad=True).repeat(16,1,1)
+        if h.is_cuda:
+            init=init.cuda()
+        matrix = self.fc3(h).view(-1,self.k,self.k) + init
+        output = torch.bmm(torch.transpose(input_data,1,2), matrix).transpose(1,2)
+        return output
+
+        """改良前
         h = self.NonLinear_1(input_data)
         h = self.NonLinear_2(h)
         h = self.NonLinear_3(h)
@@ -174,7 +223,7 @@ class FeatureTNet(nn.Module):
         out = torch.matmul(input_data.permute(0, 2, 1), matrix)
         out = out.permute(0, 2, 1)
         return out
-
+        """
 
 """ポイントネット"""
 class DDPM(nn.Module):
@@ -183,21 +232,7 @@ class DDPM(nn.Module):
         self.num_points = config.model.num_points
         self.num_channels = config.data.num_channels
 
-        self.main = nn.Sequential(
-            InputTNet(self.num_points),
-            NonLinear(3, 64),
-            NonLinear(64, 64),
-            FeatureTNet(self.num_points),
-            NonLinear(64, 64),
-            NonLinear(64, 128),
-            NonLinear(128, 1024),
-            MaxPool(1024, self.num_points),
-            NonLinear(1024, 512),
-            nn.Dropout(p = 0.3),
-            NonLinear(512, 256),
-            nn.Dropout(p = 0.3),
-            NonLinear(256, self.num_channels),
-        )
+        """改良前
         self.InputTNet = InputTNet(self.num_points)
         self.NonLinear_1 = NonLinear(3, 64)
         self.NonLinear_2 = NonLinear(64, 64)
@@ -210,9 +245,72 @@ class DDPM(nn.Module):
         self.NonLinear_7 = NonLinear(512, 256)
         self.NonLinear_8 = NonLinear(256, 128)
         self.NonLinear_9 = NonLinear(128, 3)
+        """
+
+        self.InputTNet = InputTNet(self.num_points)
+        self.FeatureTNet = FeatureTNet(self.num_points)
+        self.conv1 = nn.Conv1d(3,64,1)
+        self.conv1_1 = nn.Conv1d(64,64,1)
+
+        self.conv2 = nn.Conv1d(64,128,1)
+        self.conv3 = nn.Conv1d(128,1024,1)
+
+        self.conv4 = nn.Conv1d(1088, 512, 1)
+        self.conv5 = nn.Conv1d(512, 256)
+        self.conv6 = nn.Conv1d(256, 128)
+        self.conv7 = nn.Conv1d(128, 3)
+
+
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
+        self.bn6 = nn.BatchNorm1d(128)
+        self.bn7 = nn.BatchNorm1d(3)
+
 
     def forward(self, x, t):
-      #print(x.shape)
+      
+      #改良後
+      #print(x.shape) == (16, 3, 10000)
+      h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
+      h = F.relu(self.bn1(self.conv1_1(h)))
+
+      h = self.FeatureTNet(x)
+      h_64 = h
+      h = F.relu(self.bn2(self.conv2(h)))
+      h = self.bn3(self.conv3(h))
+      h = nn.MaxPool1d(h.size(-2))(h)
+      global_vector = nn.Flatten(1)(h)
+
+      #次元を増やす
+      global_vector = global_vector.unsqueeze(dim=-1)
+      global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
+      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
+      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
+      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
+      #print("h8",h8.shape)
+      #まずh8を(1024,1)から(1024,10000)に変更する
+      while global_vector.shape[2] < 8000:
+        global_vector = torch.cat((global_vector, global_vector), dim=2)
+        #print("h8",h8.shape)
+      while global_vector.shape[2] < 10000:
+        global_vector = torch.cat((global_vector, global_vector_pre), dim=2)
+      #print("h8",h8.shape)
+      #h4にh8を結合
+      h = torch.cat((h_64, global_vector), dim=1) #(1088, 10000)
+
+      h = F.relu(self.bn4(self.conv4(h)))
+      h = F.relu(self.bn5(self.conv5(h)))
+      h = F.relu(self.bn6(self.conv6(h)))
+      h = self.bn4(self.conv4(h))
+
+      return h
+      
+      """改良前
+      #print(x.shape) == (16, 10000, 3)
       h1 = self.InputTNet(x) #(3, 10000)
       #print("h1",h1.shape)
       h2 = self.NonLinear_1(h1) #(64, 10000)
@@ -254,6 +352,7 @@ class DDPM(nn.Module):
       #print("h13",h13.shape)
 
       return h13
+      """
 
 
 """

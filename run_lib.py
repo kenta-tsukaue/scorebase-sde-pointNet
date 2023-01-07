@@ -134,8 +134,8 @@ def train(config, workdir):
     idx = torch.randperm(batch.size(1))
     batch = batch[:, idx]
     #axis = 2で並び替え
-    idx_2 = torch.randperm(batch.size(2))
-    batch = batch[:, :, idx_2]
+    #idx_2 = torch.randperm(batch.size(2))
+    #batch = batch[:, :, idx_2]
     batch = batch.permute(0, 2, 1)
     #print(batch.shape)#(32, 3, 10000)
 
