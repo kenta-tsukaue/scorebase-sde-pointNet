@@ -37,9 +37,10 @@ get_normalization = normalization.get_normalization
 default_initializer = layers.default_init
 
 class InputTNet(nn.Module):
-    def __init__(self, num_points):
+    def __init__(self, num_points, batch_size):
         super(InputTNet, self).__init__()
         self.num_points = num_points
+        self.batch_size = batch_size
         self.k = 3
 
         #改良後
@@ -72,7 +73,7 @@ class InputTNet(nn.Module):
         h = F.relu(self.bn5(self.fc2(h)))
 
         #initialize as identity
-        init = torch.eye(self.k, requires_grad=True).repeat(16,1,1)
+        init = torch.eye(self.k, requires_grad=True).repeat(self.batch_size,1,1)
         if h.is_cuda:
             init=init.cuda()
         matrix = self.fc3(h).view(-1,self.k,self.k) + init
@@ -82,10 +83,11 @@ class InputTNet(nn.Module):
 
 
 class FeatureTNet(nn.Module):
-    def __init__(self, num_points):
+    def __init__(self, num_points, batch_size):
         super(FeatureTNet, self).__init__()
         self.num_points = num_points
         self.k = 64
+        self.batch_size = batch_size
 
         #改良後
         self.conv1 = nn.Conv1d(64,64,1)
@@ -117,7 +119,7 @@ class FeatureTNet(nn.Module):
         h = F.relu(self.bn5(self.fc2(h)))
 
         #initialize as identity
-        init = torch.eye(self.k, requires_grad=True).repeat(16,1,1)
+        init = torch.eye(self.k, requires_grad=True).repeat(self.batch_size,1,1)
         if h.is_cuda:
             init=init.cuda()
         matrix = self.fc3(h).view(-1,self.k,self.k) + init
@@ -133,6 +135,7 @@ class DDPM(nn.Module):
         self.nf = nf = config.model.nf
         self.act = get_act(config)
         dropout = config.model.dropout # 0.1
+        self.batch_size = config.training.batch_size
         # Condition on noise levels.
         modules = [nn.Linear(nf, nf * 4)]
         modules[0].weight.data = default_initializer()(modules[0].weight.data.shape)
@@ -142,8 +145,8 @@ class DDPM(nn.Module):
         ResnetBlock = functools.partial(ResnetBlockDDPM, temb_dim=4 * nf, dropout=dropout)
 
         nn.init.zeros_(modules[1].bias)
-        self.InputTNet = InputTNet(self.num_points)
-        self.FeatureTNet = FeatureTNet(self.num_points)
+        self.InputTNet = InputTNet(self.num_points, self.batch_size)
+        self.FeatureTNet = FeatureTNet(self.num_points, self.batch_size)
         self.conv1 = nn.Conv1d(3,64,1)
         self.conv1_1 = nn.Conv1d(64,64,1)
 
