@@ -286,7 +286,7 @@ class DDPM(nn.Module):
       h = F.relu(self.bn2(self.conv2(h)))
       h = self.bn3(self.conv3(h))
       print(288, h.shape)
-      global_vector = nn.MaxPool1d(h.size(-2))(h)
+      global_vector = nn.MaxPool1d(h.size(-1))(h)
       print(290, global_vector.shape)
       #global_vector = nn.Flatten(1)(h)
       print(292, global_vector.shape)
