@@ -52,20 +52,20 @@ class NonLinear(nn.Module):
         self.BatchNorm1d = nn.BatchNorm1d(self.output_channels)
 
     def forward(self, input_data):
-        ##print("NonLinear開始！")
-        ##print("dim()", input_data.dim())
+        ###print("NonLinear開始！")
+        ###print("dim()", input_data.dim())
         h = input_data
         if input_data.dim() == 3:
           h = input_data.permute(0, 2, 1)
         h = self.Linear(h)
-        ##print(57,h.shape)
+        ###print(57,h.shape)
         h = self.ReLU(h)
-        ##print(59,h.shape)
-        ##print("dim()", h.dim())
+        ###print(59,h.shape)
+        ###print("dim()", h.dim())
         if h.dim() == 3:
           h = h.permute(0, 2, 1)
         h = self.BatchNorm1d(h)
-        ##print(61, h.shape)
+        ###print(61, h.shape)
         return h
 
 
@@ -81,7 +81,7 @@ class MaxPool(nn.Module):
         out = input_data.view(-1, self.num_channels, self.num_points)
         out = self.main(out)
         out = out.view(-1, self.num_channels)
-        #print(out.shape)
+        ##print(out.shape)
         return out
 
 
@@ -116,7 +116,7 @@ class InputTNet(nn.Module):
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
-        #print("InputTNet開始!") input_data.shape == (16, 10000, 3)
+        ##print("InputTNet開始!") input_data.shape == (16, 10000, 3)
         """改良前
         h = self.NonLinear_1(input_data)
         h = self.NonLinear_2(h)
@@ -124,9 +124,9 @@ class InputTNet(nn.Module):
         h = self.MaxPool(h)
         h = self.NonLinear_4(h)
         h = self.NonLinear_5(h)
-        #print(122,h.shape)
+        ##print(122,h.shape)
         h = self.Linear(h)
-        #print(124, h.shape)
+        ##print(124, h.shape)
         matrix = h.view(-1, 3, 3)
         out = torch.matmul(input_data.permute(0, 2, 1), matrix)
         out = out.permute(0, 2, 1)
@@ -137,7 +137,7 @@ class InputTNet(nn.Module):
         h = F.relu(self.bn2(self.conv2(h)))
         h = F.relu(self.bn3(self.conv3(h)))
         pool = nn.MaxPool1d(h.size(-1))(h)
-        #print("pool", pool.shape)
+        ##print("pool", pool.shape)
         flat = nn.Flatten(1)(pool) #(16, 9216)
 
         h = F.relu(self.bn4(self.fc1(flat)))
@@ -187,8 +187,8 @@ class FeatureTNet(nn.Module):
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
         #改良後
-        #print("FeatureTNet開始!")
-        #print(input_data.shape)
+        ##print("FeatureTNet開始!")
+        ##print(input_data.shape)
         #改良後
         h = F.relu(self.bn1(self.conv1(input_data)))
         h = F.relu(self.bn2(self.conv2(h)))
@@ -214,9 +214,9 @@ class FeatureTNet(nn.Module):
         h = self.MaxPool(h)
         h = self.NonLinear_4(h)
         h = self.NonLinear_5(h)
-        #print(166,h.shape)
+        ##print(166,h.shape)
         h = self.Linear(h)
-        #print(168, h.shape)
+        ##print(168, h.shape)
         matrix = h.view(-1, 64, 64)
         #matrix = self.main(input_data).view(-1, 64, 64)
         #out = torch.matmul(input_data.view(-1, self.num_points, 64), matrix)
@@ -276,34 +276,34 @@ class DDPM(nn.Module):
     def forward(self, x, t):
       
       #改良後
-      #print(x.shape) == (16, 3, 10000)
+      ##print(x.shape) == (16, 3, 10000)
       h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
-      #print(281, h.shape)
+      ##print(281, h.shape)
       h = F.relu(self.bn1_1(self.conv1_1(h)))
-      #print(283, h.shape)
+      ##print(283, h.shape)
       h = self.FeatureTNet(h)
       h_64 = h
       h = F.relu(self.bn2(self.conv2(h)))
       h = self.bn3(self.conv3(h))
-      print(288, h.shape)
+      #print(288, h.shape)
       global_vector = nn.MaxPool1d(h.size(-1))(h)
-      print(290, global_vector.shape)
+      #print(290, global_vector.shape)
       #global_vector = nn.Flatten(1)(h)
-      print(292, global_vector.shape)
-      print(295, global_vector.shape)
+      #print(292, global_vector.shape)
+      #print(295, global_vector.shape)
       global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
-      print(300, global_vector_pre.shape)
-      #print("h8",h8.shape)
+      #print(300, global_vector_pre.shape)
+      ##print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
       while global_vector.shape[2] < 8000:
         global_vector = torch.cat((global_vector, global_vector), dim=2)
-        #print("h8",h8.shape)
+        ##print("h8",h8.shape)
       while global_vector.shape[2] < 10000:
         global_vector = torch.cat((global_vector, global_vector_pre), dim=2)
-      print("308", global_vector.shape)
+      #print("308", global_vector.shape)
       #h4にh8を結合
       h = torch.cat((h_64, global_vector), dim=1) #(1088, 10000)
 
@@ -315,15 +315,15 @@ class DDPM(nn.Module):
       return h
       
       """改良前
-      #print(x.shape) == (16, 10000, 3)
+      ##print(x.shape) == (16, 10000, 3)
       h1 = self.InputTNet(x) #(3, 10000)
-      #print("h1",h1.shape)
+      ##print("h1",h1.shape)
       h2 = self.NonLinear_1(h1) #(64, 10000)
-      #print("h2",h2.shape)
+      ##print("h2",h2.shape)
       h3 = self.NonLinear_2(h2) #(64, 10000)
-      #print("h3",h3.shape)
+      ##print("h3",h3.shape)
       h4 = self.FeatureTNet(h3) # local feature (64, 10000)
-      #print("h4",h4.shape)
+      ##print("h4",h4.shape)
 
       h5 = self.NonLinear_3(h4) #(64, 10000)
       h6 = self.NonLinear_4(h5) #(128, 10000)
@@ -335,26 +335,26 @@ class DDPM(nn.Module):
       h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
       h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
       h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
-      #print("h8",h8.shape)
+      ##print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
       while h8.shape[2] < 8000:
         h8 = torch.cat((h8, h8), dim=2)
-        #print("h8",h8.shape)
+        ##print("h8",h8.shape)
       while h8.shape[2] < 10000:
         h8 = torch.cat((h8, h8_pre), dim=2)
-      #print("h8",h8.shape)
+      ##print("h8",h8.shape)
       #h4にh8を結合
       h9 = torch.cat((h4, h8), dim=1) #(1088, 10000)
-      #print("h9",h9.shape)
+      ##print("h9",h9.shape)
 
       h10 = self.NonLinear_6(h9)
-      #print("h10",h10.shape)
+      ##print("h10",h10.shape)
       h11 = self.NonLinear_7(h10)
-      #print("h11",h11.shape)
+      ##print("h11",h11.shape)
       h12 = self.NonLinear_8(h11)
-      #print("h12",h12.shape)
+      ##print("h12",h12.shape)
       h13 = self.NonLinear_9(h12)
-      #print("h13",h13.shape)
+      ##print("h13",h13.shape)
 
       return h13
       """
@@ -371,7 +371,7 @@ class DDPM(nn.Module):
     ch_mult = config.model.ch_mult # (1, 2, 2, 2)
     self.num_res_blocks = num_res_blocks = config.model.num_res_blocks #2
     self.attn_resolutions = attn_resolutions = config.model.attn_resolutions #(16,)
-#    ###print('attn_resolutions=',attn_resolutions)
+#    ####print('attn_resolutions=',attn_resolutions)
     dropout = config.model.dropout # 0.1
     resamp_with_conv = config.model.resamp_with_conv # True
     self.num_resolutions = num_resolutions = len(ch_mult)# 4
@@ -434,7 +434,7 @@ class DDPM(nn.Module):
 
   def forward(self, x, labels):
     modules = self.all_modules
-    ##print("114行 : モジュールたちは\n",modules)
+    ###print("114行 : モジュールたちは\n",modules)
     
     m_idx = 0
     if self.conditional: #True
@@ -456,92 +456,92 @@ class DDPM(nn.Module):
       # Input is in [0, 1]
       h = 2 * x - 1.
     # Downsampling block
-    ###print("137行 : hの形は", h.shape)
+    ####print("137行 : hの形は", h.shape)
     h = modules[m_idx](h)
     hs = [h]
     m_idx += 1
-    ##print("====================ダウンサンプリング開始========================")
-    ###print("141行 : hの初期値の形は", h.shape)
-    ####print("num_resolutionの数は", self.num_resolutions)
+    ###print("====================ダウンサンプリング開始========================")
+    ####print("141行 : hの初期値の形は", h.shape)
+    #####print("num_resolutionの数は", self.num_resolutions)
     for i_level in range(self.num_resolutions):
       # Residual blocks for this resolution
       for i_block in range(self.num_res_blocks):
-        ###print("\n\n\n\n======================ブロック開始=========================")
-        ##print(147, m_idx, modules[m_idx])
-        ###print("hs:",hs[-1].shape, "temb:", temb.shape)
+        ####print("\n\n\n\n======================ブロック開始=========================")
+        ###print(147, m_idx, modules[m_idx])
+        ####print("hs:",hs[-1].shape, "temb:", temb.shape)
         h = modules[m_idx](hs[-1], temb)
-        ###print("149行 : hの形は", h.shape)
+        ####print("149行 : hの形は", h.shape)
         m_idx += 1
-        ###print("self.attn_resolutions", self.attn_resolutions)
+        ####print("self.attn_resolutions", self.attn_resolutions)
         if h.shape[-1] in self.attn_resolutions:
-          ###print("152行 : attn_resolutions")
+          ####print("152行 : attn_resolutions")
           h = modules[m_idx](h)
-          ###print(156, m_idx, modules[m_idx])
-          ###print("157行目 : hの形は", h.shape)
+          ####print(156, m_idx, modules[m_idx])
+          ####print("157行目 : hの形は", h.shape)
           m_idx += 1
         
         hs.append(h)
       if i_level != self.num_resolutions - 1:
-        ###print("num_resolution")
-        ###print(163, m_idx, modules[m_idx])
-        ###print("164行目 : hの形は", h.shape)
+        ####print("num_resolution")
+        ####print(163, m_idx, modules[m_idx])
+        ####print("164行目 : hの形は", h.shape)
         hs.append(modules[m_idx](hs[-1]))
         m_idx += 1
     
-    ##print("\n\n\n=============================ダウンサンプリング終了========================\n\n\n")
-    ##print("167行 : ダウンサンプリング終了後のhの形は", h.shape)
+    ###print("\n\n\n=============================ダウンサンプリング終了========================\n\n\n")
+    ###print("167行 : ダウンサンプリング終了後のhの形は", h.shape)
     h = hs[-1]
-    ##print("169行 : hの形は", h.shape)
-    ##print(modules[m_idx])
+    ###print("169行 : hの形は", h.shape)
+    ###print(modules[m_idx])
     h = modules[m_idx](h, temb)
-    ##print("172行 : hの形は", h.shape)
+    ###print("172行 : hの形は", h.shape)
     m_idx += 1
-    ##print(modules[m_idx])
+    ###print(modules[m_idx])
     h = modules[m_idx](h)
-    ##print("176行 : hの形は", h.shape)
+    ###print("176行 : hの形は", h.shape)
     m_idx += 1
-    ##print(modules[m_idx])
+    ###print(modules[m_idx])
     h = modules[m_idx](h, temb)
-    ##print("180行 : hの形は", h.shape)
+    ###print("180行 : hの形は", h.shape)
     m_idx += 1
 
     # Upsampling block
-    ##print("\n\n\n====================アップサンプリング開始===================\n\n\n")
+    ###print("\n\n\n====================アップサンプリング開始===================\n\n\n")
     for i_level in reversed(range(self.num_resolutions)):
       for i_block in range(self.num_res_blocks + 1):
-        ##print("\n\n\n\n=====================ブロック開始====================")
-        ##print('188行 : ',i_level,i_block)
-        ##print("189行 : hの形は", h.shape)
-        ##print("190行 : hsの形は", hs[-1].shape)
-        ##print("191行 : catは", torch.cat([h, hs[-1]], dim=1).shape)
-        ##print(m_idx, modules[m_idx])
+        ###print("\n\n\n\n=====================ブロック開始====================")
+        ###print('188行 : ',i_level,i_block)
+        ###print("189行 : hの形は", h.shape)
+        ###print("190行 : hsの形は", hs[-1].shape)
+        ###print("191行 : catは", torch.cat([h, hs[-1]], dim=1).shape)
+        ###print(m_idx, modules[m_idx])
         h = modules[m_idx](torch.cat([h, hs.pop()], dim=1), temb)
-        ##print("194行 : hの形は", h.shape)
+        ###print("194行 : hの形は", h.shape)
         m_idx += 1
 #      if h.shape[-2] in self.attn_resolutions:  #  use y dim
       if h.shape[-1] in self.attn_resolutions:  #  use x dim
-        ##print("198行 : attn_resolutions入りまーす")
-        ##print(m_idx, modules[m_idx])
+        ###print("198行 : attn_resolutions入りまーす")
+        ###print(m_idx, modules[m_idx])
         h = modules[m_idx](h)
-        ##print("201行 : hの形は", h.shape)
+        ###print("201行 : hの形は", h.shape)
         m_idx += 1
       if i_level != 0:
-        ##print("204行 : 入ります")
-        ##print(modules[m_idx])
+        ###print("204行 : 入ります")
+        ###print(modules[m_idx])
         h = modules[m_idx](h)
-        ##print("207行 : hの形は", h.shape)
+        ###print("207行 : hの形は", h.shape)
         m_idx += 1
-    ##print("\n\n\n====================アップサンプリング終了！===================\n\n\n")
+    ###print("\n\n\n====================アップサンプリング終了！===================\n\n\n")
 
-    ##print("211行 : アップサンプリング終了後のhの形は", h.shape)
+    ###print("211行 : アップサンプリング終了後のhの形は", h.shape)
     assert not hs
-    ###print(modules[m_idx])
+    ####print(modules[m_idx])
     h = self.act(modules[m_idx](h))
-    ###print("207行 : hの形は", h.shape)
+    ####print("207行 : hの形は", h.shape)
     m_idx += 1
-    ###print(modules[m_idx])
+    ####print(modules[m_idx])
     h = modules[m_idx](h)
-    ###print("207行 : hの形は", h.shape)
+    ####print("207行 : hの形は", h.shape)
     m_idx += 1
     assert m_idx == len(modules)
 
@@ -551,7 +551,7 @@ class DDPM(nn.Module):
       # so no need of doing it here.
       used_sigmas = self.sigmas[labels, None, None, None]
       h = h / used_sigmas
-    ##print("229行 : 最終のhの形は", h.shape)
+    ###print("229行 : 最終のhの形は", h.shape)
     return h
 
 """
