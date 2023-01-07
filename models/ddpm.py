@@ -157,6 +157,7 @@ class FeatureTNet(nn.Module):
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
         print("FeatureTNet開始!")
+        print(input_data.shape)
         h = self.NonLinear_1(input_data)
         h = self.NonLinear_2(h)
         h = self.NonLinear_3(h)
