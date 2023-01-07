@@ -132,7 +132,6 @@ class DDPM(nn.Module):
         self.num_channels = config.data.num_channels
         self.nf = nf = config.model.nf
         dropout = config.model.dropout # 0.1
-        self.act = act = get_act(config)
         print(self.act)
         # Condition on noise levels.
         modules = [nn.Linear(nf, nf * 4)]
@@ -140,7 +139,7 @@ class DDPM(nn.Module):
         nn.init.zeros_(modules[0].bias)
         modules.append(nn.Linear(nf * 4, nf * 4))
         modules[1].weight.data = default_initializer()(modules[1].weight.data.shape)
-        ResnetBlock = functools.partial(ResnetBlockDDPM, act=act, temb_dim=4 * nf, dropout=dropout)
+        ResnetBlock = functools.partial(ResnetBlockDDPM, temb_dim=4 * nf, dropout=dropout)
 
         nn.init.zeros_(modules[1].bias)
         self.InputTNet = InputTNet(self.num_points)

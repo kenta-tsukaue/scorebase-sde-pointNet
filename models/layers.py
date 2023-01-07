@@ -622,13 +622,11 @@ class Downsample(nn.Module):
 
 class ResnetBlockDDPM(nn.Module):
   """The ResNet Blocks used in DDPM."""
-  def __init__(self, act, in_ch, out_ch=None, temb_dim=None, conv_shortcut=False, dropout=0.1):
+  def __init__(self, in_ch, out_ch=None, temb_dim=None, conv_shortcut=False, dropout=0.1):
     super().__init__()
     if out_ch is None:
       out_ch = in_ch
     self.GroupNorm_0 = nn.GroupNorm(num_groups=32, num_channels=in_ch, eps=1e-6)
-    self.act = act
-    print(self.act)
     self.Conv_0 = ddpm_conv1x1(in_ch, out_ch)
     if temb_dim is not None:
       self.Dense_0 = nn.Linear(temb_dim, out_ch)
@@ -651,7 +649,7 @@ class ResnetBlockDDPM(nn.Module):
     B, C, H = x.shape
     assert C == self.in_ch
     out_ch = self.out_ch if self.out_ch else self.in_ch
-    h = self.act(self.GroupNorm_0(x))
+    h = nn.SiLU(self.GroupNorm_0(x))
 #    print('h=',h.shape,x.shape); raise RuntimeError
     h = self.Conv_0(h)
     # Add bias to each feature map conditioned on the time embedding
