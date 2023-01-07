@@ -132,6 +132,7 @@ class DDPM(nn.Module):
         self.num_channels = config.data.num_channels
         self.nf = nf = config.model.nf
         self.act = get_act(config)
+        print(self.act)
         dropout = config.model.dropout # 0.1
         # Condition on noise levels.
         modules = [nn.Linear(nf, nf * 4)]
