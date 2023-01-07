@@ -256,9 +256,9 @@ class DDPM(nn.Module):
         self.conv3 = nn.Conv1d(128,1024,1)
 
         self.conv4 = nn.Conv1d(1088, 512, 1)
-        self.conv5 = nn.Conv1d(512, 256)
-        self.conv6 = nn.Conv1d(256, 128)
-        self.conv7 = nn.Conv1d(128, 3)
+        self.conv5 = nn.Conv1d(512, 256, 1)
+        self.conv6 = nn.Conv1d(256, 128, 1)
+        self.conv7 = nn.Conv1d(128, 3, 1)
 
 
         self.bn1 = nn.BatchNorm1d(64)
