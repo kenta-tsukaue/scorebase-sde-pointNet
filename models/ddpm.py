@@ -133,6 +133,7 @@ class DDPM(nn.Module):
         self.nf = nf = config.model.nf
         dropout = config.model.dropout # 0.1
         self.act = act = get_act(config)
+        print(self.act)
         # Condition on noise levels.
         modules = [nn.Linear(nf, nf * 4)]
         modules[0].weight.data = default_initializer()(modules[0].weight.data.shape)
