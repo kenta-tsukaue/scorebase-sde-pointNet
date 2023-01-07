@@ -197,11 +197,11 @@ class DDPM(nn.Module):
             NonLinear(512, 256),
             nn.Dropout(p = 0.3),
             NonLinear(256, self.num_channels),
-            )
+        )
         self.InputTNet = InputTNet(self.num_points)
         self.NonLinear_1 = NonLinear(3, 64)
         self.NonLinear_2 = NonLinear(64, 64)
-        self.FeatureTNet = (self.num_points)
+        self.FeatureTNet = FeatureTNet(self.num_points)
         self.NonLinear_3 = NonLinear(64, 64)
         self.NonLinear_4 = NonLinear(64, 128)
         self.NonLinear_5 = NonLinear(128, 1024)
