@@ -232,7 +232,8 @@ class DDPM(nn.Module):
       print("h8",h8.shape)
       #次元を増やす
       h8 = h8.unsqueeze(dim=-1)
-      h8_pre = h8
+      h8_pre = torch.cat((h8, h8), dim=2)
+      h8_pre = torch.cat((h8_pre, h8_pre), dim=2)
       print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
       while h8.shape[2] < 8000:
