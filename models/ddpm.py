@@ -131,6 +131,7 @@ class DDPM(nn.Module):
         self.num_points = config.model.num_points
         self.num_channels = config.data.num_channels
         self.nf = nf = config.model.nf
+        self.act = get_act(config)
         dropout = config.model.dropout # 0.1
         # Condition on noise levels.
         modules = [nn.Linear(nf, nf * 4)]
@@ -181,7 +182,9 @@ class DDPM(nn.Module):
       timesteps = t
       temb = layers.get_timestep_embedding(timesteps, self.nf)
       temb = modules[0](temb)
-      temb = modules[1](nn.SiLU(temb))
+      print(temb)
+      temb = modules[1](self.act(temb))
+      print(temb)
 
       h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
       h = self.resNet1(h, temb)
