@@ -193,7 +193,7 @@ class FeatureTNet(nn.Module):
         h = F.relu(self.bn1(self.conv1(input_data)))
         h = F.relu(self.bn2(self.conv2(h)))
         h = F.relu(self.bn3(self.conv3(h)))
-        pool = nn.MaxPool1d(h.size(-2))(h)
+        pool = nn.MaxPool1d(h.size(-1))(h)
         flat = nn.Flatten(1)(pool)
 
         h = F.relu(self.bn4(self.fc1(flat)))
@@ -281,7 +281,7 @@ class DDPM(nn.Module):
       print(281, h.shape)
       h = F.relu(self.bn1_1(self.conv1_1(h)))
       print(283, h.shape)
-      h = self.FeatureTNet(x)
+      h = self.FeatureTNet(h)
       h_64 = h
       h = F.relu(self.bn2(self.conv2(h)))
       h = self.bn3(self.conv3(h))
