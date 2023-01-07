@@ -310,7 +310,7 @@ class DDPM(nn.Module):
       h = F.relu(self.bn4(self.conv4(h)))
       h = F.relu(self.bn5(self.conv5(h)))
       h = F.relu(self.bn6(self.conv6(h)))
-      h = self.bn4(self.conv4(h))
+      h = self.bn7(self.conv7(h))
 
       return h
       
