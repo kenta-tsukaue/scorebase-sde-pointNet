@@ -176,7 +176,7 @@ class FeatureTNet(nn.Module):
         self.conv3 = nn.Conv1d(128,1024,1)
         self.fc1 = nn.Linear(1024,512)
         self.fc2 = nn.Linear(512,256)
-        self.fc3 = nn.Linear(256,9)
+        self.fc3 = nn.Linear(256,4096)
 
         self.bn1 = nn.BatchNorm1d(64)
         self.bn2 = nn.BatchNorm1d(128)
