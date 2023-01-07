@@ -263,6 +263,7 @@ class DDPM(nn.Module):
 
 
         self.bn1 = nn.BatchNorm1d(64)
+        self.bn1_1 = nn.BatchNorm1d(64)
         self.bn2 = nn.BatchNorm1d(128)
         self.bn3 = nn.BatchNorm1d(1024)
 
@@ -277,8 +278,9 @@ class DDPM(nn.Module):
       #改良後
       #print(x.shape) == (16, 3, 10000)
       h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
-      h = F.relu(self.bn1(self.conv1_1(h)))
-
+      print(281, h.shape)
+      h = F.relu(self.bn1_1(self.conv1_1(h)))
+      print(283, h.shape)
       h = self.FeatureTNet(x)
       h_64 = h
       h = F.relu(self.bn2(self.conv2(h)))
