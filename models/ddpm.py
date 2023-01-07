@@ -239,7 +239,7 @@ class DDPM(nn.Module):
         h8 = torch.cat((h8, h8), dim=2)
         print("h8",h8.shape)
       while h8.shape[2] < 10000:
-        h8 = torch.chat((h8, h8_pre), dim=2)
+        h8 = torch.cat((h8, h8_pre), dim=2)
       print("h8",h8.shape)
       #h4にh8を結合
       h9 = torch.cat((h4, h8), dim=1) #(1088, 10000)
