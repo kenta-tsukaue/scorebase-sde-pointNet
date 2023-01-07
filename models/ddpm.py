@@ -137,7 +137,7 @@ class InputTNet(nn.Module):
         h = F.relu(self.bn2(self.conv2(h)))
         h = F.relu(self.bn3(self.conv3(h)))
         pool = nn.MaxPool1d(h.size(-1))(h)
-        print("pool", pool.shape)
+        #print("pool", pool.shape)
         flat = nn.Flatten(1)(pool) #(16, 9216)
 
         h = F.relu(self.bn4(self.fc1(flat)))
@@ -278,22 +278,24 @@ class DDPM(nn.Module):
       #改良後
       #print(x.shape) == (16, 3, 10000)
       h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
-      print(281, h.shape)
+      #print(281, h.shape)
       h = F.relu(self.bn1_1(self.conv1_1(h)))
-      print(283, h.shape)
+      #print(283, h.shape)
       h = self.FeatureTNet(h)
       h_64 = h
       h = F.relu(self.bn2(self.conv2(h)))
       h = self.bn3(self.conv3(h))
       h = nn.MaxPool1d(h.size(-2))(h)
       global_vector = nn.Flatten(1)(h)
-
+      print(290, global_vector.shape)
       #次元を増やす
       global_vector = global_vector.unsqueeze(dim=-1)
+      print(293, global_vector.shape)
       global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
+      print(293, global_vector_pre.shape)
       #print("h8",h8.shape)
       #まずh8を(1024,1)から(1024,10000)に変更する
       while global_vector.shape[2] < 8000:
@@ -301,7 +303,7 @@ class DDPM(nn.Module):
         #print("h8",h8.shape)
       while global_vector.shape[2] < 10000:
         global_vector = torch.cat((global_vector, global_vector_pre), dim=2)
-      #print("h8",h8.shape)
+      print("204", global_vector.shape)
       #h4にh8を結合
       h = torch.cat((h_64, global_vector), dim=1) #(1088, 10000)
 
