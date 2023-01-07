@@ -138,6 +138,7 @@ class InputTNet(nn.Module):
         h = F.relu(self.bn3(self.conv3(h)))
         pool = nn.MaxPool1d(h.size(-2))(h)
         flat = nn.Flatten(1)(pool)
+        print("flat", flat)
 
         h = F.relu(self.bn4(self.fc1(flat)))
         h = F.relu(self.bn5(self.fc2(h)))
