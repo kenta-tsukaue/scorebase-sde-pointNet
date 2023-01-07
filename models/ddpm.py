@@ -143,13 +143,35 @@ class FeatureTNet(nn.Module):
             NonLinear(512, 256),
             nn.Linear(256, 4096)
         )
+        self.NonLinear_1 = NonLinear(64, 64)
+        self.NonLinear_2 = NonLinear(64, 128)
+        self.NonLinear_3 = NonLinear(128, 1024)
+        self.NonLinear_4 = NonLinear(1024, 512)
+        self.NonLinear_5 = NonLinear(512, 256)
+
+        self.Linear = nn.Linear(256, 4096)
+
+        self.MaxPool = MaxPool(1024, self.num_points)
+
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
-        #input_data = input_data.permute(0, 2, 1)
-        matrix = self.main(input_data).view(-1, 64, 64)
-        out = torch.matmul(input_data.view(-1, self.num_points, 64), matrix)
-        out = out.view(-1, 64)
+        print("FeatureTNet開始!")
+        h = self.NonLinear_1(input_data)
+        h = self.NonLinear_2(h)
+        h = self.NonLinear_3(h)
+        h = self.MaxPool(h)
+        h = self.NonLinear_4(h)
+        h = self.NonLinear_5(h)
+        print(166,h.shape)
+        h = self.Linear(h)
+        print(168, h.shape)
+        matrix = h.view(-1, 64, 64)
+        #matrix = self.main(input_data).view(-1, 64, 64)
+        #out = torch.matmul(input_data.view(-1, self.num_points, 64), matrix)
+        #out = out.view(-1, 64)
+        out = torch.matmul(input_data.permute(0, 2, 1), matrix)
+        out = out.permute(0, 2, 1)
         return out
 
 
