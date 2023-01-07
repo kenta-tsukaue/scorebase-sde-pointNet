@@ -100,11 +100,29 @@ class InputTNet(nn.Module):
             NonLinear(512, 256),
             nn.Linear(256, 9)
         )
+        self.NonLinear_1 = NonLinear(3, 64)
+        self.NonLinear_2 = NonLinear(64, 128)
+        self.NonLinear_3 = NonLinear(128, 1024)
+        self.NonLinear_4 = NonLinear(1024, 512)
+        self.NonLinear_5 = NonLinear(512, 256)
+
+        self.Linear = nn.Linear(256, 9)
+
+        self.MaxPool = MaxPool(1024, self.num_points)
 
     # shape of input_data is (batchsize x num_points, channel)
     def forward(self, input_data):
         print("InputTNet開始!")
-        matrix = self.main(input_data).view(-1, 3, 3)
+        h = self.NonLinear_1(input_data)
+        h = self.NonLinear_2(h)
+        h = self.NonLinear_3(h)
+        h = self.MaxPool(h)
+        h = self.NonLinear_4(h)
+        h = self.NonLinear_5(h)
+        print(122,h)
+        h = self.Linear(h)
+        print(124, h)
+        matrix = self.main(h).view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
         out = out.view(-1, 3)
         return out
