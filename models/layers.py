@@ -628,7 +628,6 @@ class ResnetBlockDDPM(nn.Module):
       out_ch = in_ch
     self.GroupNorm_0 = nn.GroupNorm(num_groups=32, num_channels=in_ch, eps=1e-6)
     self.act = act
-    print(self.act)
     self.Conv_0 = ddpm_conv1x1(in_ch, out_ch)
     if temb_dim is not None:
       self.Dense_0 = nn.Linear(temb_dim, out_ch)

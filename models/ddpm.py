@@ -182,9 +182,9 @@ class DDPM(nn.Module):
       timesteps = t
       temb = layers.get_timestep_embedding(timesteps, self.nf)
       temb = modules[0](temb)
-      print(temb)
+      #print(temb)
       temb = modules[1](self.act(temb))
-      print(temb)
+      #print(temb)
 
       h = F.relu(self.bn1(self.conv1(self.InputTNet(x))))
       h = self.resNet1(h, temb)
