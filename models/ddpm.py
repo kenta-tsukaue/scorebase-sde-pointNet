@@ -119,10 +119,10 @@ class InputTNet(nn.Module):
         h = self.MaxPool(h)
         h = self.NonLinear_4(h)
         h = self.NonLinear_5(h)
-        print(122,h)
+        print(122,h.shape)
         h = self.Linear(h)
-        print(124, h)
-        matrix = self.main(h).view(-1, 3, 3)
+        print(124, h.shape)
+        matrix = h.view(-1, 3, 3)
         out = torch.matmul(input_data.view(-1, self.num_points, 3), matrix)
         out = out.view(-1, 3)
         return out
