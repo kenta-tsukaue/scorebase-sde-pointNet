@@ -149,34 +149,25 @@ class DDPM(nn.Module):
         nn.init.zeros_(modules[1].bias)
         self.InputTNet = InputTNet(self.num_points, self.batch_size, self.act)
         self.FeatureTNet = FeatureTNet(self.num_points, self.batch_size, self.act)
+
         self.conv1 = nn.Conv1d(3,64,1)
-        self.conv1_1 = nn.Conv1d(64,64,1)
+        self.conv2 = nn.Conv1d(128, 3, 1)
 
-        self.conv2 = nn.Conv1d(64,128,1)
-        self.conv3 = nn.Conv1d(128,1024,1)
+        self.resNet1 = ResnetBlock(self.act, 64, 128)#self.conv2 = nn.Conv1d(64,128,1)
+        self.resNet2 = ResnetBlock(self.act, 128, 1024)#self.conv3 = nn.Conv1d(128,1024,1)
 
-        self.conv4 = nn.Conv1d(1088, 512, 1)
-        self.conv5 = nn.Conv1d(512, 256, 1)
-        self.conv6 = nn.Conv1d(256, 128, 1)
-        self.conv7 = nn.Conv1d(128, 3, 1)
+        self.resNet3 = ResnetBlock(self.act, 1088, 512)#self.conv4 = nn.Conv1d(1088, 512, 1)
+        self.resNet4 = ResnetBlock(self.act, 512, 256)#self.conv5 = nn.Conv1d(512, 256, 1)
 
-        self.resNet1 = ResnetBlock(self.act, 64, 64)
-
-        self.resNet2 = ResnetBlock(self.act, 64, 64)
-        self.resNet3 = ResnetBlock(self.act, 128, 128)
-
-        self.resNet4 = ResnetBlock(self.act, 512, 512)
-        self.resNet5 = ResnetBlock(self.act, 256, 256)
+        self.resNet5 = ResnetBlock(self.act, 256, 128)#self.conv6 = nn.Conv1d(256, 128, 1)
 
         self.bn1 = nn.BatchNorm1d(64)
-        self.bn1_1 = nn.BatchNorm1d(64)
         self.bn2 = nn.BatchNorm1d(128)
         self.bn3 = nn.BatchNorm1d(1024)
 
         self.bn4 = nn.BatchNorm1d(512)
         self.bn5 = nn.BatchNorm1d(256)
         self.bn6 = nn.BatchNorm1d(128)
-        self.bn7 = nn.BatchNorm1d(3)
 
         self.all_modules = nn.ModuleList(modules)
 
@@ -192,45 +183,30 @@ class DDPM(nn.Module):
       #print(temb)
 
       h = self.act(self.bn1(self.conv1(self.InputTNet(x))))
-      h = self.resNet1(h, temb)
-      ##print(281, h.shape)
-      h = self.act(self.bn1_1(self.conv1_1(h)))
-      ##print(283, h.shape)
+
       h = self.FeatureTNet(h)
       h_64 = h
-      h = self.resNet2(h, temb)
-      h = self.act(self.bn2(self.conv2(h)))
-      h = self.resNet3(h, temb)
-      h = self.bn3(self.conv3(h))
+      h = self.act(self.bn2(self.resNet1(h)))
+      h = self.bn3(self.resNet2(h))
       #print(288, h.shape)
       global_vector = nn.MaxPool1d(h.size(-1))(h)
-      """
-      global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
-      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
-      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
-      global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
-      #print(300, global_vector_pre.shape)
-      ##print("h8",h8.shape)
-      #まずh8を(1024,1)から(1024,10000)に変更する
-      while global_vector.shape[2] < 8000:
-        global_vector = torch.cat((global_vector, global_vector), dim=2)
-        ##print("h8",h8.shape)
-      while global_vector.shape[2] < 10000:
-        global_vector = torch.cat((global_vector, global_vector_pre), dim=2)
-      #print("308", global_vector.shape)
-      """
       global_matrix = global_vector.view(-1, 1024, 1).repeat(1, 1, self.num_points)
-      print(global_matrix.shape)
+
       #h4にh8を結合
       h = torch.cat((h_64, global_matrix), dim=1) #(1088, 10000)
 
-      h = self.act(self.bn4(self.conv4(h)))
-      h = self.resNet4(h, temb)
-      h = self.act(self.bn5(self.conv5(h)))
-      h = self.resNet5(h, temb)
-      h = self.act(self.bn6(self.conv6(h)))
-      h = self.bn7(self.conv7(h))
+      h = self.act(self.bn4(self.resNet3(h)))
+      h = self.act(self.bn5(self.resNet4(h)))
+      h = self.act(self.bn6(self.resNet5(h)))
+      h = self.conv7(h)
 
+      print(203, h.shape)
+      h = h.transpose(2,1).contiguous()
+      print(205, h.shape)
+      h = F.log_softmax(h.view(-1,self.num_channels), dim=-2)
+      print(207, h.shape)
+      h = h.view(self.batch_size, self.num_channels, self.num_points)
+      print(209, h.shape)
       return h
       
       
