@@ -203,7 +203,7 @@ class DDPM(nn.Module):
       #print(203, h.shape)
       h = h.transpose(2,1).contiguous()
       #print(205, h.shape)
-      h = F.log_softmax(h.view(self.batch_size, self.num_channels * self.num_points))
+      h = F.log_softmax(h.view(self.batch_size, self.num_channels * self.num_points), dim=-1)
       #print(207, h.shape)
       h = h.view(self.batch_size, self.num_channels, self.num_points)
       #print(209, h.shape)
