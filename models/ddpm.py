@@ -90,7 +90,7 @@ class FeatureTNet(nn.Module):
         self.k = 64
         self.batch_size = batch_size
         self.act = act
-        
+
         #改良後
         self.conv1 = nn.Conv1d(64,64,1)
         self.conv2 = nn.Conv1d(64,128,1)
@@ -204,10 +204,7 @@ class DDPM(nn.Module):
       h = self.bn3(self.conv3(h))
       #print(288, h.shape)
       global_vector = nn.MaxPool1d(h.size(-1))(h)
-      #print(290, global_vector.shape)
-      #global_vector = nn.Flatten(1)(h)
-      #print(292, global_vector.shape)
-      #print(295, global_vector.shape)
+      """
       global_vector_pre = torch.cat((global_vector, global_vector), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
       global_vector_pre = torch.cat((global_vector_pre, global_vector_pre), dim=2)
@@ -221,8 +218,11 @@ class DDPM(nn.Module):
       while global_vector.shape[2] < 10000:
         global_vector = torch.cat((global_vector, global_vector_pre), dim=2)
       #print("308", global_vector.shape)
+      """
+      global_matrix = global_vector.view(-1, 1024, 1).repeat(1, 1, self.num_points)
+      print(global_matrix.shape)
       #h4にh8を結合
-      h = torch.cat((h_64, global_vector), dim=1) #(1088, 10000)
+      h = torch.cat((h_64, global_matrix), dim=1) #(1088, 10000)
 
       h = self.act(self.bn4(self.conv4(h)))
       h = self.resNet4(h, temb)
