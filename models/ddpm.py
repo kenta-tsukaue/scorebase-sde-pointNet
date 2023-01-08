@@ -186,8 +186,10 @@ class DDPM(nn.Module):
 
       h = self.FeatureTNet(h)
       h_64 = h
-      h = self.act(self.bn2(self.resNet1(h)))
-      h = self.bn3(self.resNet2(h))
+      #h = self.act(self.bn2(self.resNet1(h)))
+      h = self.resNet1(h)
+      #h = self.bn3(self.resNet2(h))
+      h = self.resNet2(h)
       #print(288, h.shape)
       global_vector = nn.MaxPool1d(h.size(-1))(h)
       global_matrix = global_vector.view(-1, 1024, 1).repeat(1, 1, self.num_points)
@@ -195,9 +197,12 @@ class DDPM(nn.Module):
       #h4にh8を結合
       h = torch.cat((h_64, global_matrix), dim=1) #(1088, 10000)
 
-      h = self.act(self.bn4(self.resNet3(h)))
-      h = self.act(self.bn5(self.resNet4(h)))
-      h = self.act(self.bn6(self.resNet5(h)))
+      #h = self.act(self.bn4(self.resNet3(h)))
+      h = self.resNet3(h)
+      #h = self.act(self.bn5(self.resNet4(h)))
+      h = self.resNet4(h)
+      #h = self.act(self.bn6(self.resNet5(h)))
+      h = self.resNet5(h)
       h = self.conv2(h)
 
       #print(203, h.shape)
