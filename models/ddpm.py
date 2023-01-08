@@ -198,7 +198,7 @@ class DDPM(nn.Module):
       h = self.act(self.bn4(self.resNet3(h)))
       h = self.act(self.bn5(self.resNet4(h)))
       h = self.act(self.bn6(self.resNet5(h)))
-      h = self.conv7(h)
+      h = self.conv2(h)
 
       print(203, h.shape)
       h = h.transpose(2,1).contiguous()
