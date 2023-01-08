@@ -200,13 +200,13 @@ class DDPM(nn.Module):
       h = self.act(self.bn6(self.resNet5(h)))
       h = self.conv2(h)
 
-      print(203, h.shape)
+      #print(203, h.shape)
       h = h.transpose(2,1).contiguous()
-      print(205, h.shape)
+      #print(205, h.shape)
       h = F.log_softmax(h.view(self.batch_size, self.num_channels * self.num_points))
-      print(207, h.shape)
+      #print(207, h.shape)
       h = h.view(self.batch_size, self.num_channels, self.num_points)
-      print(209, h.shape)
+      #print(209, h.shape)
       return h
       
       
