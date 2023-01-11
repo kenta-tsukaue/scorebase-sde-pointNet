@@ -152,12 +152,21 @@ class DDPM(nn.Module):
 
         self.conv1 = nn.Conv1d(3,64,1)
         self.conv2 = nn.Conv1d(128, 3, 1)
-
+        
+        self.resNet0 = ResnetBlock(self.act, 64, 64)
+        self.resNet0_2 = ResnetBlock(self.act, 64, 64)
+        self.resNet0_3 = ResnetBlock(self.act, 64, 64)
         self.resNet1 = ResnetBlock(self.act, 64, 128)#self.conv2 = nn.Conv1d(64,128,1)
+        self.resNet1_2 = ResnetBlock(self.act, 128, 128)
+        self.resNet1_3 = ResnetBlock(self.act, 128, 128)
         self.resNet2 = ResnetBlock(self.act, 128, 1024)#self.conv3 = nn.Conv1d(128,1024,1)
 
         self.resNet3 = ResnetBlock(self.act, 1088, 512)#self.conv4 = nn.Conv1d(1088, 512, 1)
+        self.resNet3_2 = ResnetBlock(self.act, 512, 512)
+        self.resNet3_3 = ResnetBlock(self.act, 512, 512)
         self.resNet4 = ResnetBlock(self.act, 512, 256)#self.conv5 = nn.Conv1d(512, 256, 1)
+        self.resNet4_2 = ResnetBlock(self.act, 256, 256)
+        self.resNet4_3 = ResnetBlock(self.act, 256, 256)
 
         self.resNet5 = ResnetBlock(self.act, 256, 128)#self.conv6 = nn.Conv1d(256, 128, 1)
 
@@ -186,8 +195,13 @@ class DDPM(nn.Module):
 
       h = self.FeatureTNet(h)
       h_64 = h
+      h = self.resNet0(h) 
+      h = self.resNet0_2(h)
+      h = self.resNet0_3(h)
       #h = self.act(self.bn2(self.resNet1(h)))
       h = self.resNet1(h)
+      h = self.resNet1_2(h)
+      h = self.resNet1_3(h)
       #h = self.bn3(self.resNet2(h))
       h = self.resNet2(h)
       #print(288, h.shape)
@@ -199,8 +213,12 @@ class DDPM(nn.Module):
 
       #h = self.act(self.bn4(self.resNet3(h)))
       h = self.resNet3(h)
+      h = self.resNet3_2(h)
+      h = self.resNet3_3(h)
       #h = self.act(self.bn5(self.resNet4(h)))
       h = self.resNet4(h)
+      h = self.resNet4_2(h)
+      h = self.resNet4_3(h)
       #h = self.act(self.bn6(self.resNet5(h)))
       h = self.resNet5(h)
       h = self.conv2(h)
